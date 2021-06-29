@@ -45,4 +45,25 @@ public class MathController {
         return "The volume of a " + placeHolder + " rectangle is " + volume;
     }
 
+    @PostMapping("/area")
+    public String area(@RequestParam Map<String, String> content){
+
+        final String typeKey = "type";
+        final String radiusKey = "radius";
+        final String lengthKey = "length";
+        final String widthKey = "width";
+
+        if (content.get(typeKey).equals("circle")) {
+            return String.format(
+                    "Area of a %s with a radius of %d is %.5f",
+                    content.get(typeKey),
+                    Integer.parseInt(content.get(radiusKey)),
+                    Math.pow(Integer.parseInt(content.get(radiusKey)),2) * Math.PI
+                    );
+        } else {
+            return "";
+
+        }
+
+    }
 }
