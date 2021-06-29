@@ -50,7 +50,7 @@ public class MathController {
 
         final String typeKey = "type";
         final String radiusKey = "radius";
-        final String lengthKey = "length";
+        final String heightKey = "height";
         final String widthKey = "width";
 
         if (content.get(typeKey).equals("circle")) {
@@ -61,8 +61,12 @@ public class MathController {
                     Math.pow(Integer.parseInt(content.get(radiusKey)),2) * Math.PI
                     );
         } else {
-            return "";
-
+            return String.format("Area of a %sx%s %s is %d",
+                    content.get(widthKey),
+                    content.get(heightKey),
+                    content.get(typeKey),
+                    Integer.parseInt(content.get(heightKey)) * Integer.parseInt(content.get(widthKey))
+                    );
         }
 
     }
