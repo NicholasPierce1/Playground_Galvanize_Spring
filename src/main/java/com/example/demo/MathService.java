@@ -1,5 +1,8 @@
 package com.example.demo;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -65,26 +68,37 @@ public class MathService {
         return "The volume of a " + placeHolder + " rectangle is " + volume;
     }
 
-    public String doArea(final Map<String, String> content){
+    public ResponseEntity<String> doArea(final Map<String, String> content){
         final String typeKey = "type";
         final String radiusKey = "radius";
         final String heightKey = "height";
         final String widthKey = "width";
 
-        if (content.get(typeKey).equals("circle")) {
-            return String.format(
-                    "Area of a %s with a radius of %d is %.5f",
+        final String invalid = "Invalid";
+
+        if (content.get(typeKey).equals("circle") && content.containsKey(radiusKey)) {
+            return new ResponseEntity<String>(
+                    String.format("Area of a %s with a radius of %d is %.5f",
                     content.get(typeKey),
                     Integer.parseInt(content.get(radiusKey)),
                     Math.pow(Integer.parseInt(content.get(radiusKey)),2) * Math.PI
-            );
-        } else {
-            return String.format("Area of a %sx%s %s is %d",
+                    ),
+                    HttpStatus.OK
+                );
+        } else if(content.get(typeKey).equals("rectangle") && content.containsKey(heightKey) && content.containsKey(widthKey)) {
+            return new ResponseEntity<String>(
+                    String.format("Area of a %sx%s %s is %d",
                     content.get(widthKey),
                     content.get(heightKey),
                     content.get(typeKey),
-                    Integer.parseInt(content.get(heightKey)) * Integer.parseInt(content.get(widthKey))
-            );
+                    Integer.parseInt(content.get(heightKey)) * Integer.parseInt(content.get(widthKey))),
+                    HttpStatus.OK
+                    );
         }
+        else
+            return new ResponseEntity<String>(
+                    invalid,
+                    HttpStatus.BAD_REQUEST
+            );
     }
 }

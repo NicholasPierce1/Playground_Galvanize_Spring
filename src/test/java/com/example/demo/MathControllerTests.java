@@ -104,4 +104,18 @@ public class MathControllerTests {
 
     }
 
+    @Test
+    public void testMathAreaRectangleError() throws Exception{
+
+        final MockHttpServletRequestBuilder postArea = post("/math/area")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .param("type", "rectangle")
+                .param("radius", "4");
+
+        this.mvc.perform(postArea)
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Invalid"));
+
+    }
+
 }

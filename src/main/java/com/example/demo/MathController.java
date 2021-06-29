@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +38,7 @@ public class MathController {
     }
 
     @PostMapping("/area")
-    public String area(@RequestParam Map<String, String> content){
+    public ResponseEntity<String> area(@RequestParam Map<String, String> content){
         return this.mathService.doArea(content);
     }
 
