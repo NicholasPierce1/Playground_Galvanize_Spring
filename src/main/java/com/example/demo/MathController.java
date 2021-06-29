@@ -13,7 +13,7 @@ import java.util.Map;
 public class MathController {
 
     @Autowired
-    private MathService mathService;
+    MathService mathService;
 
     @GetMapping("/pi")
     public String getPi(){
@@ -44,6 +44,5 @@ public class MathController {
         placeHolder = placeHolder.substring(0, placeHolder.length() -1);
         return "The volume of a " + placeHolder + " rectangle is " + volume;
     }
-
 
 }

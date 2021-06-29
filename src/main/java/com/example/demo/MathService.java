@@ -1,10 +1,7 @@
 package com.example.demo;
 
 import org.springframework.stereotype.Service;
-import org.springframework.util.MultiValueMap;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -47,16 +44,11 @@ public class MathService {
         int sum = 0;
 
         for (int i = 0; i < n.length; i++) {
-            if (i == (n.length - 1)) {
-                str += n[i];
-            } else {
-                str += n[i] + " + ";
-            }
+            str += n[i] + " + ";
             sum += n[i];
-
         }
 
+        str = str.substring(0, str.length() - 3);
         return str + " = " + sum;
-
     }
 }
