@@ -1,5 +1,6 @@
 package com.example.demo;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,20 +12,23 @@ import java.util.Map;
 @RequestMapping( value = "/math/")
 public class MathController {
 
+    @Autowired
+    private MathService mathService;
+
     @GetMapping("/pi")
     public String getPi(){
         return "3.141592653589793";
     }
 
     @GetMapping("/calculate")
-    public String calculate(MathService mathService) {
-        return mathService.doMath();
+    public String calculate(@RequestParam Map<String, String> map) {
+        return mathService.doMath(map);
     }
 
     @PostMapping("/sum")
-    public String sum(@RequestParam MultiValueMap<String, String> n){
-        MathService mathService = new MathService(n);
-        return mathService.doSum();
+    public String sum(@RequestParam( value = "n" ) int... n){
+        // MathService mathService = new MathService(n);
+        return mathService.doSum(n);
     }
 
     @GetMapping("/volume/{length}/{width}/{height}")
