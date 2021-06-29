@@ -51,4 +51,40 @@ public class MathService {
         str = str.substring(0, str.length() - 3);
         return str + " = " + sum;
     }
+
+    public String doVolume(final Map<String, String> map){
+        int volume = 1;
+        String placeHolder = "";
+
+        for (String data : map.values()) {
+            placeHolder += data + "x";
+
+            volume *= Integer.parseInt(data);
+        }
+        placeHolder = placeHolder.substring(0, placeHolder.length() -1);
+        return "The volume of a " + placeHolder + " rectangle is " + volume;
+    }
+
+    public String doArea(final Map<String, String> content){
+        final String typeKey = "type";
+        final String radiusKey = "radius";
+        final String heightKey = "height";
+        final String widthKey = "width";
+
+        if (content.get(typeKey).equals("circle")) {
+            return String.format(
+                    "Area of a %s with a radius of %d is %.5f",
+                    content.get(typeKey),
+                    Integer.parseInt(content.get(radiusKey)),
+                    Math.pow(Integer.parseInt(content.get(radiusKey)),2) * Math.PI
+            );
+        } else {
+            return String.format("Area of a %sx%s %s is %d",
+                    content.get(widthKey),
+                    content.get(heightKey),
+                    content.get(typeKey),
+                    Integer.parseInt(content.get(heightKey)) * Integer.parseInt(content.get(widthKey))
+            );
+        }
+    }
 }
