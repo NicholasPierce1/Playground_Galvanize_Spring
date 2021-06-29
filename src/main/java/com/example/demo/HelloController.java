@@ -3,6 +3,8 @@ package com.example.demo;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+
 @RestController
 public class HelloController {
 
@@ -62,6 +64,24 @@ public class HelloController {
                 headers,
                 HttpStatus.OK
         );
+    }
+
+    @RequestMapping( value = "/getN_Items", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> getN_Items(
+            @RequestParam(value = "n") int... firstName
+    ){
+        // System.out.println(firstName[0]);
+        System.out.println(Arrays.stream(firstName).reduce(0, Integer::sum));
+
+        // if required is false, then prepare to handle null if no default value
+        final HttpHeaders headers = new HttpHeaders();
+
+        return new ResponseEntity<String>(
+                String.valueOf(Arrays.stream(firstName).reduce(0, Integer::sum)),
+                headers,
+                HttpStatus.OK
+        );
+
     }
 
 }
