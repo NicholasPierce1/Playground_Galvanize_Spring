@@ -15,6 +15,7 @@ public class FlightInfo {
 
     private double capacity = 100;
 
+    @JsonProperty("safe")
     private final boolean isSafe = true;
 
     @JsonFormat(pattern = "yyyy-MM-dd")

@@ -2,6 +2,9 @@ package com.example.demo.controllers;
 
 import com.example.demo.model.FlightInfo;
 import com.example.demo.model.Task;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -152,6 +155,24 @@ public class HelloController {
         System.out.println("Did it set the ignore value? " + flightInfo.getSecretInfo().equals("scary flight"));
 
         return flightInfo;
+    }
+
+    @RequestMapping(
+            value = "/postFlightInfo/custom",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            method = RequestMethod.POST
+    )
+    public FlightInfo createFlightInfoFromObjectMapper(@RequestBody String jsonString) throws JsonProcessingException {
+
+        final ObjectMapper objectMapper = JsonMapper.builder()
+                .findAndAddModules()
+                .build();
+                //new ObjectMapper();
+
+        //System.out.println("Did it set the ignore value? " + flightInfo.getSecretInfo().equals("scary flight"));
+
+        return objectMapper.readValue(jsonString, FlightInfo.class);
     }
 
 }
