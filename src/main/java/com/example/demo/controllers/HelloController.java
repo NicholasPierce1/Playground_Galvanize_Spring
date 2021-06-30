@@ -158,6 +158,19 @@ public class HelloController {
     }
 
     @RequestMapping(
+            value = "/postFlightInfos",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            method = RequestMethod.POST
+    )
+    public FlightInfo createFlightInfos(@RequestBody FlightInfo[] flightInfo){
+
+        // System.out.println("Did it set the ignore value? " + flightInfo.getSecretInfo().equals("scary flight"));
+
+        return flightInfo[flightInfo.length -1];
+    }
+
+    @RequestMapping(
             value = "/postFlightInfo/custom",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE,
