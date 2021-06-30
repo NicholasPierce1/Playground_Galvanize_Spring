@@ -1,6 +1,8 @@
-package com.example.demo;
+package com.example.demo.controllers;
 
-import org.json.JSONObject;
+import com.example.demo.model.FlightInfo;
+import com.example.demo.model.Task;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
@@ -104,13 +106,18 @@ public class HelloController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
             method = RequestMethod.POST)
-    public Task postNewTaskWithForm(@ModelAttribute("Task") Task task){
+    public Task postNewTaskWithForm(@RequestBody @ModelAttribute("Task") Task task){
         return task;
     }
 
     @PostMapping(value = "/map-example", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public String getMapParams(@RequestParam Map<String, String> formData) {
         return formData.toString();
+    }
+
+    @PostMapping(value = "/URL-encoded-indv", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String getIndvParams(@RequestParam String name) {
+        return name;
     }
 
     @RequestMapping(value = "/webRequest", method = GET)
@@ -123,6 +130,28 @@ public class HelloController {
         //params.forEach( (x,y) -> {list.add(String.format("%s-%s"));} );
 
         return null;
+    }
+
+    @RequestMapping(
+            value = "/getFlightInfo",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            method = RequestMethod.GET
+    )
+    public @NotNull FlightInfo getFlightInfo(){
+        return new FlightInfo();
+    }
+
+    @RequestMapping(
+            value = "/postFlightInfo",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            method = RequestMethod.POST
+    )
+    public FlightInfo createFlightInfo(@RequestBody FlightInfo flightInfo){
+
+        System.out.println("Did it set the ignore value? " + flightInfo.getSecretInfo().equals("scary flight"));
+
+        return flightInfo;
     }
 
 }
