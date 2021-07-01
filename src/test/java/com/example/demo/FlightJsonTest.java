@@ -141,9 +141,9 @@ public class FlightJsonTest {
         this._mvc.perform(postRequest)
                 .andExpect(status().isOk())
                 //.andExpect(jsonPath("$.result").value(expected.getDouble("result")))
-                .andExpect(jsonPath("$.result", is(350)));
+                .andExpect(jsonPath("$.result", is(350)))
                 //.andExpect(jsonPath("$").value(expected.toString()));
-                //.andExpect(content().json(expected.toString()));
+                .andExpect(content().json(expected.toString()));
         //                .andExpect((ResultMatcher) jsonPath("$.result", is(expected.get("result"))));
 
         // step 3: create, and run, mvc test and assert json object is expected
