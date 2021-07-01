@@ -1,5 +1,5 @@
 insert into Customer(id, first_name, last_name) values (1, 'John', 'Doe');
 insert into Customer(id, first_name, last_name) values (2, 'Jane', 'Doe');
 
-insert into Lesson(id, name) values (1, 'Spring');
-insert into Lesson(id, name) values (2, 'Angular');
+insert into Lesson(id, name, delivered_on) values (1, 'Spring', TO_DATE('2021-6-30', 'yyyy-MM-dd'));
+insert into Lesson(id, name, delivered_on) values (2, 'Angular', TO_DATE('2021-7-7', 'yyyy-MM-dd'));

@@ -1,10 +1,14 @@
 package com.example.demo.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jdk.jfr.Enabled;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
+@JsonInclude( value = JsonInclude.Include.NON_NULL )
 public class Lesson {
 
     @Id
@@ -13,6 +17,10 @@ public class Lesson {
 
     @Column
     public String name;
+
+    @Column
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    public LocalDate deliveredOn;
 
     public Lesson(){}
 
@@ -30,6 +38,14 @@ public class Lesson {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public LocalDate getDeliveredOn() {
+        return deliveredOn;
+    }
+
+    public void setDeliveredOn(LocalDate deliveredOn) {
+        this.deliveredOn = deliveredOn;
     }
 }
 
