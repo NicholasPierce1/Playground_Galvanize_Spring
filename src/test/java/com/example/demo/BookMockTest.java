@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.HashMap;
@@ -127,6 +128,34 @@ public class BookMockTest {
 
         verify(this._bookController, times(1)).getBookByCriteria(inputs);
         verifyNoMoreInteractions(this._bookController);
+    }
+
+    @Test
+    public void testDeleteById() throws Exception {
+
+        final String idToDelete = "60e4c2b333e8d442aa182828";
+
+        final Book expectedBookToDelete = new Book(){{
+            set_id("60e4c2b333e8d442aa182828");
+            set_price(9915.5);
+            set_author("Author1");
+            set_title("Book1");
+            set_length(10.0);
+        }};
+
+        when(this._bookController.deleteBookById(idToDelete))
+                .thenReturn(expectedBookToDelete);
+
+        assertEquals(
+                this._objectMapper.writeValueAsString(expectedBookToDelete),
+                this._objectMapper.writeValueAsString(this._bookController.deleteBookById(idToDelete))
+        );
+
+        verify(this._bookController, times(1)).deleteBookById(idToDelete);
+        verifyNoMoreInteractions(this._bookController);
+
+
+
     }
 
 }

@@ -4,10 +4,7 @@ import com.example.demo.Repository.BookRepository;
 import com.example.demo.domain.Book;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -48,4 +45,18 @@ public class BookController {
         return this._bookRepository.findByCriteria(criteria);
     }
 
+    @RequestMapping(
+    value = "/delete/{id}",
+    method = RequestMethod.DELETE,
+    produces = MediaType.APPLICATION_JSON_VALUE
+    )
+
+public Book deleteBookById(final @PathVariable String id){
+
+
+        return null;
+
+    }
 }
+
+
