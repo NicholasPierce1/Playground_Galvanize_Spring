@@ -37,16 +37,19 @@ import java.util.Map;
 public class TestMongo implements CommandLineRunner {
 
     @Autowired
-    MongoTemplate mongoTemplate;
+    private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Override
     public void run(String... args) throws Exception {
         System.out.println(mongoTemplate != null);
         System.out.println("Collection Exists? " + mongoTemplate.collectionExists("testDatabaseCollection"));
 
-        final ObjectMapper objectMapper = JsonMapper.builder()
-                .findAndAddModules()
-                .build();
+//        final ObjectMapper objectMapper = JsonMapper.builder()
+//                .findAndAddModules()
+//                .build();
 
         final MongoCollection<Document> collection =  mongoTemplate.getCollection("testDatabaseCollection");
         final Query query = new Query(Criteria.where("name").is("Bob"));
