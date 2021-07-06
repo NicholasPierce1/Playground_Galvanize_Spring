@@ -36,8 +36,8 @@ import java.time.format.DateTimeFormatterBuilder;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class LessonTests {
 
-    @Autowired
-    private LessonRepository _lessonRepository;
+//    @Autowired
+//    private LessonRepository _lessonRepository;
 
     @Autowired
     private MockMvc _mvc;
@@ -170,10 +170,15 @@ public class LessonTests {
 
         final MockHttpServletRequestBuilder getBetweenDates = get(
                 "http://localhost:8080/lesson/between?startDate=2000-01-01&endDate=2022-12-20"
-        );
+        )
+                .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        System.out.println(expectedJsonArray.toString());
 
         final MockHttpServletResponse response = this._mvc.perform(getBetweenDates)
-                .andExpect(status().isOk()).andReturn().getResponse();
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andReturn().getResponse();
 
         final JSONArray actualJsonArray = new JSONArray(response.getContentAsString());
 
