@@ -3,6 +3,7 @@ package com.example.demo.domain;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document
 public class Book {
@@ -11,15 +12,19 @@ public class Book {
     private String _id;
 
     @JsonProperty("Title")
+    @Field("Title")
     private String _title;
 
     @JsonProperty("Author")
+    @Field("Author")
     private String _author;
 
     @JsonProperty("Length")
+    @Field("Length")
     private double _length;
 
     @JsonProperty("Price")
+    @Field("Price")
     private double _price;
 
     public static String  BOOK_COLLECTION_NAME = "Book";
