@@ -87,8 +87,8 @@ public class BookController {
     public long updateBookByCriteria(
             @NotNull final @RequestBody Map<String, ? extends Map<String, ?>> inputState){
         return this._bookRepository.updateBooksByCriteria(
-                (Map<String, ?>)inputState.get("criteria"),
-                (Map<String, ?>) inputState.get("updateState")
+                inputState.get("criteria"),
+                inputState.get("updateState")
         );
     }
 
