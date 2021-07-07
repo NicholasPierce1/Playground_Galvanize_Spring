@@ -178,7 +178,7 @@ public class BookMockTest {
                 }}
         );
 
-        final HashMap<String, Object> inputs = new HashMap<String, Object>(){{
+        final HashMap<String, ?> inputs = new HashMap<String, Object>(){{
             put("Length", 10.0);
             put("Price", 9915.5);
         }};
