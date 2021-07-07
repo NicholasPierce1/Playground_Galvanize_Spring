@@ -154,8 +154,6 @@ public class BookMockTest {
         verify(this._bookController, times(1)).deleteBookById(idToDelete);
         verifyNoMoreInteractions(this._bookController);
 
-
-
     }
 
 }

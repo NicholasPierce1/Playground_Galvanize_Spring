@@ -2,6 +2,8 @@ package com.example.demo.controllers;
 
 import com.example.demo.Repository.BookRepository;
 import com.example.demo.domain.Book;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +24,7 @@ public class BookController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Book saveBook(final @RequestBody Book toSave){
+    public Book saveBook(@NotNull final @RequestBody Book toSave){
         return this._bookRepository.saveBook(toSave);
     }
 
@@ -41,7 +43,7 @@ public class BookController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public List<Book> getBookByCriteria(final @RequestBody Map<String, ?> criteria){
+    public List<Book> getBookByCriteria(@NotNull final @RequestBody Map<String, ?> criteria){
         return this._bookRepository.findByCriteria(criteria);
     }
 
@@ -50,13 +52,47 @@ public class BookController {
     method = RequestMethod.DELETE,
     produces = MediaType.APPLICATION_JSON_VALUE
     )
-
-public Book deleteBookById(final @PathVariable String id){
-
-
-        return null;
-
+    public @Nullable Book deleteBookById(@NotNull final @PathVariable String id){
+        return this._bookRepository.deleteBookById(id);
     }
+
+    @RequestMapping(
+            value = {"/deleteBy", "/deleteBy/"},
+            method = RequestMethod.DELETE,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public List<Book> deleteBookByCriteria(@NotNull final @RequestBody Map<String, ?> criteria){
+        return this._bookRepository.deleteBookByCriteria(criteria);
+    }
+
+    @RequestMapping(
+            value = "/update/{id}",
+            method = RequestMethod.PUT,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public long updateBookById(
+            @NotNull final @PathVariable String id,
+            @NotNull final @RequestBody Map<String, ?> updateState){
+        return this._bookRepository.updateBookById(id, updateState);
+    }
+
+    @RequestMapping(
+            value = {"/updateBy/", "/updateBy"},
+            method = RequestMethod.PUT,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public long updateBookByCriteria(
+            @NotNull final @RequestBody Map<String, Map<String, ?>> inputState){
+        return this._bookRepository.updateBooksByCriteria(
+                (Map<String, ?>)inputState.get("criteria"),
+                (Map<String, ?>) inputState.get("updateState")
+        );
+    }
+
+
 }
 
 

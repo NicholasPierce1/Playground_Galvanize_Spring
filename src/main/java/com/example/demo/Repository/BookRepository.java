@@ -3,10 +3,13 @@ package com.example.demo.Repository;
 
 import com.example.demo.domain.Book;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -24,15 +27,15 @@ public class BookRepository {
     @Autowired
     private MongoTemplate _mongoTemplate;
 
-    public Book saveBook(final Book toSave){
+    public @NotNull Book saveBook(@NotNull final Book toSave){
         return this._mongoTemplate.insert(toSave, Book.BOOK_COLLECTION_NAME);
     }
 
-    public List<Book> findAllBooks(){
+    public @NotNull List<Book> findAllBooks(){
         return this._mongoTemplate.findAll(Book.class, Book.BOOK_COLLECTION_NAME);
     }
 
-    public List<Book> findByCriteria(final Map<String, ?> criteria){
+    public @NotNull List<Book> findByCriteria(@NotNull final Map<String, ?> criteria){
 
         final Query query = new Query();
 
@@ -57,6 +60,56 @@ public class BookRepository {
         System.out.println(returnType);
 
         return returnType;
+    }
+
+    public @Nullable Book deleteBookById(@NotNull final String id){
+
+        final Query idQuery = new Query()
+                .addCriteria(Criteria.where("_id").is(id));
+
+        return this._mongoTemplate.findAndRemove(idQuery, Book.class, Book.BOOK_COLLECTION_NAME);
+
+    }
+
+    public @Nullable List<Book> deleteBookByCriteria(@NotNull final Map<String, ?> criteria){
+
+        final Query query = new Query();
+
+        for(String key : criteria.keySet())
+            query.addCriteria(
+                    Criteria.where(key).is(criteria.get(key))
+            );
+
+        return this._mongoTemplate.findAllAndRemove(query, Book.class, Book.BOOK_COLLECTION_NAME);
+
+    }
+
+    public long updateBookById(@NotNull final String id, @NotNull final Map<String, ?> updateState){
+
+        final Update update = new Update();
+
+        updateState.forEach(update::set);
+
+        final Query idQuery = new Query()
+                .addCriteria(Criteria.where("_id").is(id));
+
+        return this._mongoTemplate.upsert(idQuery, update, Book.class, Book.BOOK_COLLECTION_NAME).getMatchedCount();
+
+    }
+
+    public long updateBooksByCriteria(@NotNull final Map<String, ?> criteria, @NotNull final Map<String, ?> updateState){
+        final Update update = new Update();
+
+        updateState.forEach(update::set);
+
+        final Query query = new Query();
+
+        for(String key : criteria.keySet())
+            query.addCriteria(
+                    Criteria.where(key).is(criteria.get(key))
+            );
+
+        return this._mongoTemplate.updateMulti(query, update, Book.class, Book.BOOK_COLLECTION_NAME).getMatchedCount();
     }
 
 }
