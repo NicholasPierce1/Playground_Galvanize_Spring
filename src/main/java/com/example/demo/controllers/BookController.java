@@ -85,7 +85,7 @@ public class BookController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public long updateBookByCriteria(
-            @NotNull final @RequestBody Map<String, Map<String, ?>> inputState){
+            @NotNull final @RequestBody Map<String, ? extends Map<String, ?>> inputState){
         return this._bookRepository.updateBooksByCriteria(
                 (Map<String, ?>)inputState.get("criteria"),
                 (Map<String, ?>) inputState.get("updateState")
