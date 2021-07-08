@@ -35,7 +35,7 @@ public class HelloController {
         final HttpHeaders headers = new HttpHeaders();
 
         return new ResponseEntity<String>(
-                "Hello",
+                "Hello from home controller",
                 headers,
                 HttpStatus.OK
         );
