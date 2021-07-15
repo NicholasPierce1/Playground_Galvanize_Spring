@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.demo.configuration;
 
 import com.example.demo.model.TestDatabaseCollection;
 import com.fasterxml.jackson.databind.ObjectMapper;

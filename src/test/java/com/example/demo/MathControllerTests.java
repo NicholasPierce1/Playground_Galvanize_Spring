@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(MathController.class)
-@ContextConfiguration(classes = {MathService.class, MathController.class})
+@ContextConfiguration(classes ={MathService.class, MathController.class, DemoApplication.class} )
 @AutoConfigureMockMvc
 public class MathControllerTests {
     @Autowired
