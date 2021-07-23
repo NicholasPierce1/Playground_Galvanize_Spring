@@ -12,18 +12,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/kafka/producer/")
 public class KafkaProducerController {
 
-    private final KafkaProducer producer;
+    //private final KafkaProducer producer;
 
-    @Autowired
-    public KafkaProducerController(KafkaProducer producer) {
-        this.producer = producer;
-    }
+//    @Autowired
+//    public KafkaProducerController(KafkaProducer producer) {
+//        this.producer = producer;
+//    }
 
     @PostMapping("/publish")
     public boolean messageToTopic(
             @RequestParam( value= "message", required = false, defaultValue = "hello from kafka producer") String message){
 
-        this.producer.sendMessage(message);
+       // this.producer.sendMessage(message);
 
         return true;
     }

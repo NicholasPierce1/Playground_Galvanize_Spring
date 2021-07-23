@@ -1,5 +1,9 @@
 package com.example.demo;
 
+import com.example.demo.domain.JsonMapperTestPackage.ClassB;
+import com.example.demo.domain.JsonMapperTestPackage.ClassC;
+import com.example.demo.domain.JsonMapperTestPackage.JsonMapperTest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.istack.NotNull;
 import org.h2.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -11,9 +15,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
+import org.json.JSONObject;
+
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -41,6 +46,9 @@ class DemoApplicationTests {
 
 	@Autowired
 	private DateTimeFormatter dateTimeFormatter;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Test
 	void contextLoads() {
@@ -76,6 +84,202 @@ class DemoApplicationTests {
 		Assertions.assertEquals(
 				query2Output,
 				insertTableNamesIntoQuery(query2Input, tableNames)
+		);
+
+	}
+
+	@Test
+	public void testObjectMapperCustom() throws Exception{
+
+		final JSONObject jsonObject = new JSONObject();
+		jsonObject.put("test_1", "someValue");
+		jsonObject.put("my_test_2", 3);
+
+		final String jsonString = jsonObject.toString();
+
+		final JSONObject jsonObject1 = new JSONObject();
+		jsonObject1.put("test1", "someValue");
+		jsonObject1.put("myTest2", 3);
+
+		final java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
+
+		System.out.println(date);
+
+		final HashMap<String, Object> objectHashMap = new HashMap<>();
+		objectHashMap.put("test_1", "someValue");
+		objectHashMap.put("my_test_2", 3);
+		objectHashMap.put("test_3", null);
+		objectHashMap.put("test_date", String.valueOf(date));
+		objectHashMap.put("sub_class",
+				new HashMap<String, Object>(){{
+					put("my_string", "some sub-string");
+					put("my_string_list", new ArrayList<String>(){{add("hello"); add("me!");}});
+				}});
+		objectHashMap.put("sub_class_list",
+				new ArrayList<HashMap<String, Object>>(){{
+					add(
+							new HashMap<String, Object>(){{
+								put("my_string", "some sub-string");
+								put("my_string_list", new ArrayList<String>(){{add("hello"); add("me!");}});
+							}}
+					);
+					add(
+							new HashMap<String, Object>(){{
+								put("my_string", "some sub-string");
+								put("my_string_list", new ArrayList<String>(){{add("hello"); add("me!");}});
+							}}
+					);
+				}}
+				);
+		objectHashMap.put(
+				"class_a",
+						new HashMap<String,Object>(){{
+							put("x", 3);
+							put("y", "someString");
+							put("z", true);
+							put("type", "ClassB");
+						}}
+
+		);
+		objectHashMap.put(
+				"class_a_list",
+				new ArrayList<HashMap<String,Object>>(){{
+					add(new HashMap<String,Object>(){{
+						put("x", 3);
+						put("y", "someString");
+						put("z", true);
+						put("type", "ClassB");
+					}});
+					add(new HashMap<String,Object>(){{
+						put("x", 3);
+						put("y", "someString");
+						put("d", 5.5);
+						put("type", "ClassC");
+					}});
+				}}
+		);
+
+
+		final String jsonString1 = jsonObject1.toString();
+
+		final JsonMapperTest jsonMapperTest = this.objectMapper.convertValue(objectHashMap, JsonMapperTest.class);
+
+		Assertions.assertTrue(jsonMapperTest.getClassAList().get(0) instanceof ClassB);
+		Assertions.assertTrue(jsonMapperTest.getClassAList().get(1) instanceof ClassC);
+
+
+		//final LocalDate localDate = jsonMapperTest.getDate().toLocalDate();
+
+		//final JsonMapperTest jsonMapperTest = this.objectMapper.convertValue(jsonString, JsonMapperTest.class);
+
+		System.out.println(jsonMapperTest.getTest1());
+		System.out.println(jsonMapperTest.getMyTest2());
+		System.out.println(jsonMapperTest.getDate());
+		System.out.println(jsonMapperTest.getSubClass().getMyString());
+		System.out.println(jsonMapperTest.getSubClass().getMyStringList());
+		System.out.println(jsonMapperTest.getSubClassList());
+		System.out.println("subtype " + jsonMapperTest.getClassA().getX());
+		System.out.println("subtype " + jsonMapperTest.getClassA().getY());
+		System.out.println("subtype " + ((ClassB)jsonMapperTest.getClassA()).getZ());
+		System.out.println(this.objectMapper.writeValueAsString(jsonMapperTest.getClassAList()));
+
+
+	}
+
+	@Test
+	public void testRemovePrefixFromString(){
+
+		final String prefixStringCompoundNumeric = "PREFIX10_value_id_id";
+		final String prefixStringCompound = "PREFIX_value_id_id";
+		final String prefixStringSimple = "PREFIX_value";
+		final String expectedSimple = "value";
+		final String expectedCompoundAndNumeric = expectedSimple.concat("_id_id");
+
+		String actualStringCompoundNumeric =
+				Arrays.stream(prefixStringCompoundNumeric.split("_"))
+						.reduce(
+								"",
+								(accumulator, value) -> value.startsWith("PREFIX") ?
+										""
+										:
+										accumulator.equals("") ?
+												value
+												:
+												accumulator.concat("_").concat(value)
+								// EX:
+								// "" + PREFIX = ""
+								// "" + value = value
+								// value + id = value_id
+						);
+
+		String actualStringCompound =
+				Arrays.stream(prefixStringCompound.split("_"))
+						.reduce(
+								"",
+								(accumulator, value) -> value.startsWith("PREFIX") ?
+										""
+										:
+										accumulator.equals("") ?
+												value
+												:
+												accumulator.concat("_").concat(value)
+								// EX:
+								// "" + PREFIX = ""
+								// "" + value = value
+								// value + id = value_id
+						);
+
+		String actualStringSimple =
+				Arrays.stream(prefixStringSimple.split("_"))
+						.reduce(
+								"",
+								(accumulator, value) -> value.startsWith("PREFIX") ?
+										""
+										:
+										accumulator.equals("") ?
+												value
+												:
+												accumulator.concat("_").concat(value)
+								// EX:
+								// "" + PREFIX = ""
+								// "" + value = value
+								// value + id = value_id
+						);
+
+		Assertions.assertEquals(
+				expectedCompoundAndNumeric,
+				actualStringCompoundNumeric
+		);
+
+		Assertions.assertEquals(
+				expectedCompoundAndNumeric,
+				actualStringCompound
+		);
+
+		Assertions.assertEquals(
+				expectedSimple,
+				actualStringSimple
+		);
+
+		// solution 2 -- regex
+
+		actualStringCompoundNumeric = prefixStringCompoundNumeric.replaceFirst("PREFIX[0-9]*_", "");
+		actualStringCompound = prefixStringCompound.replaceFirst("PREFIX[0-9]*_", "");
+		actualStringSimple = prefixStringSimple.replaceFirst("PREFIX[0-9]*_", "");
+
+		Assertions.assertEquals(
+				expectedCompoundAndNumeric,
+				actualStringCompoundNumeric
+		);
+
+		Assertions.assertEquals(
+				expectedCompoundAndNumeric,
+				actualStringCompound
+		);
+
+		Assertions.assertEquals(
+				expectedSimple,
+				actualStringSimple
 		);
 
 	}

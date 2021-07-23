@@ -11,18 +11,18 @@ public class KafkaProducer {
 
     private static final String TOPIC = "test_topic";
 
-    @Autowired
-    private KafkaTemplate<String,String> kafkaTemplate;
-
-    public void sendMessage(String message){
-
-        this.kafkaTemplate.send(TOPIC,message);
-    }
-
-    @Bean
-    public NewTopic createTopic(){
-
-        return new NewTopic(TOPIC,3,(short) 1);
-    }
+//    @Autowired
+//    private KafkaTemplate<String,String> kafkaTemplate;
+//
+//    public void sendMessage(String message){
+//
+//        this.kafkaTemplate.send(TOPIC,message);
+//    }
+//
+//    @Bean
+//    public NewTopic createTopic(){
+//
+//        return new NewTopic(TOPIC,3,(short) 1);
+//    }
 
 }
