@@ -13,9 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Consumer;
 
 import org.json.JSONObject;
 
@@ -282,6 +284,25 @@ class DemoApplicationTests {
 				actualStringSimple
 		);
 
+	}
+
+	@Test
+	public void testTypeParam(){
+
+		final Consumer<List<String>> myStringConsumer = (list) -> list.forEach(System.out::println);
+
+		final List<String> myStringList = new ArrayList<String>(){{
+			add("hello");
+			add("world!");
+		}};
+
+		getType(myStringConsumer, myStringList, List.class);
+
+	}
+
+	private static <T extends List<?>> void getType(Consumer<T> someConsumer, T consumes, Class<?> type){
+
+		someConsumer.accept(consumes);
 	}
 
 	private static @Nullable String convertDateToDateString(@Nullable java.util.Date date){
