@@ -4,6 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jdk.jfr.DataAmount;
+import net.bytebuddy.implementation.bytecode.Throw;
+
+import java.io.EOFException;
+import java.io.IOException;
+import java.util.ArrayList;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(
@@ -15,7 +20,7 @@ import jdk.jfr.DataAmount;
         @JsonSubTypes.Type(value = ClassB.class, name = "ClassB"),
         @JsonSubTypes.Type(value = ClassC.class, name = "ClassC")
 })
-public abstract class ClassA {
+abstract public class ClassA { // ... wtf
 
     public int x;
 
@@ -37,5 +42,19 @@ public abstract class ClassA {
 
     public void setY(String y) {
         this.y = y;
+    }
+
+    protected void blah() throws Exception{}
+
+    public final static int blah;
+    static{
+        blah = 3;
+    }
+    {
+        x = 3;
+        y = "word";
+        short shortV = new Byte((byte)6);
+        Short shotO = shortV;
+        System.out.println(2 * shotO);
     }
 }

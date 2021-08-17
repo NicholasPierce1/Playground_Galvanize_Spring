@@ -1,10 +1,13 @@
 package com.example.demo;
 
-import com.example.demo.domain.JsonMapperTestPackage.ClassB;
-import com.example.demo.domain.JsonMapperTestPackage.ClassC;
-import com.example.demo.domain.JsonMapperTestPackage.JsonMapperTest;
+//import com.example.demo.domain.JsonMapperTestPackage.ClassB;
+//import com.example.demo.domain.JsonMapperTestPackage.ClassC;
+//import com.example.demo.domain.JsonMapperTestPackage.JsonMapperTest;
+import com.example.demo.domain.JsonMapperTestPackage.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.istack.NotNull;
+import org.apache.kafka.common.protocol.types.Field;
+import org.apache.tomcat.util.http.fileupload.MultipartStream;
 import org.h2.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
@@ -13,11 +16,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.json.JSONObject;
 
@@ -300,6 +310,122 @@ class DemoApplicationTests {
 
 	}
 
+	@Test
+	public void testLocalDateISOParse(){
+		final String date =
+				LocalDate
+				.parse("2014-10-30")
+				.format(DateTimeFormatter.ISO_DATE);
+		// local date is only local date compatible & vice versa
+		double x = 3f;
+		System.out.println(date);
+	}
+
+	@Test
+	public void testError(){
+		final ArrayList<Integer> list = new ArrayList<>();
+		try{
+//			while(1 != 1){
+//				//list.add("a");
+//			}
+			list.add(null);
+			list.remove(null);
+			list.add(1);
+			list.add(2);
+			list.add(3);
+			list.remove(1); // index
+			list.remove(Integer.valueOf(3)); // value
+			System.out.println(list);
+
+			list.addAll(Arrays.asList(4,7,6,2));
+
+//			list.sort(
+//					(a,b) ->
+//							a < b ?
+//									1 :
+//									a > b ?
+//											-1 :
+//											0
+//			);
+			list.sort(Integer::compareTo);
+			// ascending order (what is greatest or '1' goes last)
+			// here, the greatest value is the smallest so smallest goes fast
+
+			System.out.println(list);
+
+			if(list.size() != 3)
+				throw new IOException();
+			// runtime exceptions do not need to be explicitly thrown (or invoke method that has it thrown)
+			// checked exceptions must be thrown or invokes method that can throw checked Exception
+
+		}
+		catch(RuntimeException | IOException r){ // multi-catch cannot be subclasses
+			System.out.println("r");
+		}
+		catch(Exception e){
+			System.out.println("e");
+		}
+		System.out.println("we out");
+	}
+
+	@Test
+	public void testStringBuilder(){
+		try {
+			final StringBuilder stringBuilder = new StringBuilder("hello");
+			final int length = stringBuilder.length();
+			stringBuilder.delete(0, length);
+			stringBuilder.append("abc");
+			System.out.println(stringBuilder);
+			final StringBuilder stringBuilder1 = new StringBuilder("hello");
+			stringBuilder1.append(stringBuilder1); // hellohello
+			stringBuilder1.delete(0, 5); //hello
+			System.out.println(stringBuilder1);
+			stringBuilder1.insert(stringBuilder1.length(), " sir!");
+			System.out.println(stringBuilder1);
+			testException();
+		}
+		catch(Exception e ){
+			System.out.println("message");
+		}
+		System.out.println("end"); // still occurs
+	}
+
+	@Test
+	public void testFloat(){
+		float x = 123_333 < 1 ? 1: 1_3;
+		float y = 3.3f;
+		int num = (int)y; // splice
+		System.out.println(num);
+		double z = 3_3;
+		// 3.3 double (3.3)
+		// 3_3 float (33)
+		// 3_3.3 double (33.3)
+		// '_' means NOTHING
+		System.out.println(x);
+		System.out.println(System.getProperty("user.home"));
+		System.out.println(Files.exists(Paths.get(System.getProperty("user.home"))));
+		System.out.println(Files.exists(Path.of(System.getProperty("user.home"))));
+
+	}
+
+	@Test
+	public void testLoop(){
+		final int[] arr = {1,2,3,4};
+		int i = 0;
+		do{
+			System.out.print(arr[i] + " ");
+			i++;
+		}while(i < arr.length - 1);
+
+		final boolean[] b_arr = new boolean[1];
+		System.out.println(b_arr[0]);
+
+	}
+
+	public static void testException(){
+		throw new RuntimeException();
+	}
+
 	private static <T extends List<?>> void getType(Consumer<T> someConsumer, T consumes, Class<?> type){
 
 		someConsumer.accept(consumes);
@@ -330,5 +456,78 @@ class DemoApplicationTests {
 
 		return query;
 	}
+
+	 abstract class A{
+		protected void doSomething(){}
+		 abstract void doThis();
+		protected abstract void noDoThis();
+
+		public int x;
+		public A(int x){
+			this.x = x;
+		}
+	}
+
+	class B extends A{
+		@Override
+		public void doSomething() { // can be same access level or higher
+			super.doSomething();
+		}
+
+		//@Override
+		void doThis(){ // Package private or up
+
+		}
+
+		@Override
+		public void noDoThis() { // public or protected
+
+		}
+
+		int y;
+
+		public B(int y){
+			this(y, 3);
+			this.y = y;
+			// can be done in implicit constructor but super is always called first
+		}
+
+		public B(int y, int x){
+			super(x);
+			//this.y = y;
+		}
+	}
+
+	class C{
+
+		int x;
+
+		public C(int x){
+			this.x = x;
+		}
+
+		public C(){}
+
+	}
+
+	class D extends C{
+
+		public D(){
+			//this.x =3;
+			super(3); // if no-arg const exists then must call super
+		}
+
+	}
+
+	interface Readable{
+		void doSomething();
+	}
+
+	abstract class A_Abstract implements Readable{
+	}
+
+	 class B_Abstract extends A_Abstract{
+		public void doSomething(){}
+	 }
 
 }
