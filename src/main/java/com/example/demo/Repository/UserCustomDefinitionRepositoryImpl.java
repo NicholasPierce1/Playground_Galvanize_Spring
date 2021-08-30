@@ -11,10 +11,12 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Parameter;
 import javax.persistence.Query;
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.sql.*;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingDeque;
 
 @Component
 public class UserCustomDefinitionRepositoryImpl implements UserCustomDefinitionRepository{
@@ -47,8 +49,7 @@ public class UserCustomDefinitionRepositoryImpl implements UserCustomDefinitionR
 
             assert(connection != null);
 
-            final Statement statement = connection.createStatement();
-
+            final Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
             final Query query = this._entityManager.createNativeQuery(
                     "SELECT * FROM USER_CUSTOM, ADDRESS_CUSTOM WHERE " +
@@ -58,7 +59,9 @@ public class UserCustomDefinitionRepositoryImpl implements UserCustomDefinitionR
             final ResultSet resultSet = statement.executeQuery("SELECT * FROM USER_CUSTOM, ADDRESS_CUSTOM WHERE " +
                     "USER_CUSTOM.ADDRESS = ADDRESS_CUSTOM.ADDRESS_ID;" +
                     "SELECT * FROM USER_CUSTOM;");
-
+            resultSet.beforeFirst();
+            resultSet.absolute(1000);
+            resultSet.absolute(-90);
             /*
              +
                     " SELECT * FROM USER_CUSTOM, ADDRESS_CUSTOM WHERE" +
@@ -78,17 +81,58 @@ public class UserCustomDefinitionRepositoryImpl implements UserCustomDefinitionR
 
             final List<Object[]> users = (List<Object[]>) query.getResultList();
 
-            users.forEach(
-                    (user) -> {
-                        for (final Object object : user)
-                            System.out.println(object);
-                    }
-
-            );
+//            users.forEach(
+//                    (user) -> {
+//                        for (final Object object : user)
+//                            System.out.println(object);
+//                    }
+//
+//            );
         }
         catch(Exception ex){
             System.out.println(ex.getMessage());
         }
+    }
+
+    @Override
+    public void testJDBC() throws SQLException {
+        /*
+        String url = "jdbc:derby:zoo";
+        try (Connection conn = DriverManager.getConnection(url);
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery("select name from animal")) {
+        while (rs.next())
+        System.out.println(rs.getString(1));
+        }
+         */
+
+        try {
+            final Connection connection = this.dataSource.getConnection();
+
+            System.out.println(connection == null);
+
+            assert(connection != null);
+
+            final Statement statement = connection.createStatement();
+
+            connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            /*
+            result set type:
+            forward only: cursor goes forward only (DEFAULT)
+            scroll sensitive/insensitive: cursor goes anywhere and is/isn't responsive (gets new data)
+             to changes to the data in the database
+             Sensitive is not well supported.
+             */
+            /*
+            result concurrency type:
+            read only: can't change the result set. That's done with insert, update, delete statements. (DEFAULT)
+            updatable: can change the result set too. Not supported well
+             */
+        }
+        catch(Exception ex){
+            System.out.println(ex.getMessage());
+        }
+
     }
 
 }

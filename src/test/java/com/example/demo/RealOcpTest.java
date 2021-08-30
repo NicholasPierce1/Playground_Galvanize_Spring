@@ -7,10 +7,7 @@ import org.springframework.security.core.parameters.P;
 import scala.collection.mutable.StringBuilder;
 
 import javax.swing.text.NumberFormatter;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
@@ -20,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.*;
 import java.util.stream.*;
 
@@ -27,6 +25,29 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 public class RealOcpTest {
+
+    interface  B{
+        void doSomething();
+    }
+    enum EnumA implements B{
+        a{
+            @Override
+            public void doSomething() {
+                System.out.println("A");
+            }
+        },b;
+
+        @Override
+        public void doSomething() {
+            System.out.println("B");
+        }
+    }
+
+    @Test
+    public void testEnumInheritance(){
+        EnumA.a.doSomething();
+        EnumA.b.doSomething();
+    }
 
     @Test
     public void testInnerClass() {
@@ -823,7 +844,6 @@ public class RealOcpTest {
 
         A.C c1 = new A.C();
         //A.C c2 = new A().new C(); illegal
-
     }
 
     class A{
@@ -838,7 +858,7 @@ public class RealOcpTest {
             // no static (jdk 8 only)
         }
 
-        static class C{} // can extend anything + implement (just not here -- jdk 16)
+        static class C {static class D{}} // can extend anything + implement (just not here -- jdk 16)
 
     }
 
@@ -850,4 +870,48 @@ public class RealOcpTest {
 
         blah(){}
     }
+
+    interface Default{
+        public default void doSomething(){}
+    }
+
+//    interface D {
+//        public default void doSomething(){}
+//    }
+//
+//    class BLH implements  Default, D{
+//        @Override
+//        public void doSomething() {
+//            Default.super.doSomething();
+//        }
+//    }
+
+    @Test
+    public void testEquals(){
+        Integer x = 3;
+        System.out.println(x.equals(null));
+        System.out.println(x.equals(4D));
+
+        // Default d = () -> {};
+        String[] strings = {"1", "a", "B"};
+        // natural: 1, B, a
+        // reverse: a, B, 1
+        Arrays.sort(strings);
+        System.out.println("N: " + Arrays.stream(strings).reduce("", String::concat));
+        Arrays.sort(strings, Comparator.reverseOrder());
+        System.out.println("R: " + Arrays.stream(strings).reduce("", String::concat));
+
+    }
+
+    public static void bla() throws SQLException{
+        try{
+            //throw new Exception();
+            bal1();
+        }
+        catch(Exception e) {
+            //throw new Exception();
+            throw e;
+        }
+    }
+    public static void bal1() throws SQLException{}
 }

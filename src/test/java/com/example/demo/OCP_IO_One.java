@@ -12,13 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.Transient;
 import java.io.*;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Properties;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class OCP_IO_One {
 
@@ -42,7 +41,6 @@ public class OCP_IO_One {
 
         if(terminate)
             return;
-
         // File One
         final File fileOne = new File("C:\\Test\\Files\\fileOne.bin"); // no relative or things get hard here
         System.out.println(fileOne.exists());
@@ -63,7 +61,6 @@ public class OCP_IO_One {
         System.out.println(fileTwo.exists());
         System.out.println(fileTwo.isAbsolute());
         //System.out.println(fileTwo.getPath());
-
     }
 
     @Test
@@ -108,7 +105,9 @@ public class OCP_IO_One {
             objectOutputStream.writeObject("hello again!");
             objectOutputStream.writeObject(10L);
             //objectOutputStream.writeObject(this.new SerializeMe());
-            objectOutputStream.writeObject(new OCP_IO_One.SerializeMe());
+            SerializeMe serializeMe = new OCP_IO_One.SerializeMe();
+            serializeMe.setX(10);
+            objectOutputStream.writeObject(serializeMe);
             objectOutputStream.flush();
 
             System.out.println("reading");
@@ -119,6 +118,7 @@ public class OCP_IO_One {
             System.out.println("read is: " + object1);
             System.out.println("read is: " + object2);
 
+            System.out.println("tran vars null? " + (object2.getTranName() == null));
         }
         catch(FileNotFoundException | ClassNotFoundException | EOFException e){
             System.out.println(e.getMessage());
@@ -135,11 +135,19 @@ public class OCP_IO_One {
 
 
         // be public or have public getter and setter
-        private final int x = 3;
+        private int x;
 
         public int getX(){return this.x;}
 
-         public String y = "hello";
+        public void setX(int x){this.x = x;}
+
+        private transient String tranName = "George";
+
+        public String getTranName() {
+            return tranName;
+        }
+
+        public String y = "hello";
 
         @JsonIgnore // only valid in a context where JacksonJson is default serialization
         public boolean z = true;
@@ -342,7 +350,7 @@ public class OCP_IO_One {
     }
 
     @Test
-    public void testConsole() throws Exception{
+    public void testConsole(){
 
         if(terminate)
             return;
@@ -359,10 +367,13 @@ public class OCP_IO_One {
         StringBuilder input = new StringBuilder();
         int iterationsLimit = 5;
 
-        InputStream is = new BufferedInputStream(new FileInputStream(fileOne));
-        InputStream a = new BufferedInputStream(is);
-        a = new ObjectInputStream(is);
-
+//        InputStream is = new BufferedInputStream(new FileInputStream(fileOne));
+//        InputStream a = new BufferedInputStream(is);
+//        a = new ObjectInputStream(is);
+//        String inputt;
+//        while( (inputt = console.readLine()) != null )
+//            console.writer().append(inputt);
+//        console.flush();
 //        for(final byte b: System.in.readAllBytes()){
 //            input.append(String.valueOf((char)b));
 //        }
