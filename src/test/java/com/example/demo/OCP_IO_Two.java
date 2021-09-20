@@ -1,12 +1,11 @@
 package com.example.demo;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -16,13 +15,15 @@ import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.UserPrincipal;
+import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.time.Period;
+import java.util.*;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class OCP_IO_Two {
 
     final Path pathOne = Paths.get("C://Test/Files/NIO/fileOne.txt");
@@ -31,8 +32,18 @@ public class OCP_IO_Two {
 
     final Path pathDirectory = Paths.get(pathOne.getParent().toFile().getPath(), "\\SubFolder/");
 
+    private static boolean terminate = false;
+
+    @BeforeAll
+    public void doTerminate(){
+        terminate = !Files.exists(pathOne);
+    }
+
     @Test
     public void createPaths() throws URISyntaxException {
+
+        if(terminate)
+            return;
 
         final Path pathOne = Paths.get("C://Test/Files/NIO/fileOne.txt");
 
@@ -81,6 +92,9 @@ public class OCP_IO_Two {
 
     @Test
     public void testPathComponents(){
+
+        if(terminate)
+            return;
 
         System.out.println(pathOne.getParent());
         System.out.println(pathOne.getFileName());
@@ -171,6 +185,9 @@ public class OCP_IO_Two {
 
     @Test
     public void testFiles(){
+
+        if(terminate)
+            return;
 
         System.out.println("exists: " + Files.exists(pathOne));
         System.out.println("don't exists: " + Files.notExists(Paths.get("C:/Test/Files/IAmNotHere.txt")));
@@ -358,6 +375,10 @@ public class OCP_IO_Two {
 
     @Test
     public void testDirectoryTraversal(){
+
+        if(terminate)
+            return;
+
         /*
         note:
         defaults -- depth first with Integer.MAX_VALUE as the range of layer traversals
@@ -399,6 +420,10 @@ public class OCP_IO_Two {
 
     @Test
     public void testStreamLinesForPath(){
+
+        if(terminate)
+            return;
+
         try{
             Files.walk(Paths.get(pathDirectory + "/../").normalize())
                     .filter(p -> p.getFileName().toString().toLowerCase().startsWith("file"))
@@ -439,12 +464,17 @@ public class OCP_IO_Two {
 
     @Test
     public void testRandom() {
+
+        if(terminate)
+            return;
+
         try {
             Files.copy(
                     pathOne,
                     Paths.get("/Test/Files/NIO/mule.jpg"),
                     StandardCopyOption.COPY_ATTRIBUTES,
                     StandardCopyOption.REPLACE_EXISTING
+                    //,StandardCopyOption.ATOMIC_MOVE
             );
 
             Paths.get(new URI("file:///cheetah.txt"));
@@ -465,9 +495,91 @@ public class OCP_IO_Two {
 
             Path path1 = Paths.get("./goat.txt").normalize();
             System.out.println(path1);
+
+            System.out.println(Paths.get("..").toRealPath());
+
         } catch (IOException | URISyntaxException e) {
             System.out.println("oops: " + e);
         }
+//        System.out.println(Period.ofDays(1));
+//        System.out.println(Duration.ofDays(1));
     }
 
+    @Test
+    public void testRandomTwo() throws Exception{
+
+        if(terminate)
+            return;
+
+        System.out.println(
+                Paths.get("/./DirectoryA").equals(
+                        Paths.get("/DirectoryA")
+                )
+        );
+
+        System.out.println(
+                Paths.get("/./DirectoryA").normalize().equals(
+                Paths.get("/DirectoryA").normalize())
+        );
+
+        Paths.get("../A").getParent().getRoot();
+
+        Path p = Paths.get(".");
+        Files.walk(p)
+                .map(z -> z.toAbsolutePath().toString())
+                .filter(s -> s.endsWith(".java")).limit(10)
+                .collect(Collectors.toList()).forEach(System.out::println);
+        Files.find(p,Integer.MAX_VALUE,
+                (w,a) -> w.toAbsolutePath().toString().endsWith(".java")).limit(10)
+                .collect(Collectors.toList()).forEach(System.out::println);
+
+        Files.newBufferedReader(pathOne);
+        Files.newBufferedWriter(pathOne);
+        Files.newInputStream(pathOne);
+        Files.newOutputStream(pathOne);
+
+        BufferedWriter writer= Files.newBufferedWriter(Paths.get(pathDirectory.toString(), "CreateMeWithWriter.txt"),StandardOpenOption.APPEND);
+        writer.write("\nhello!!");
+        writer.flush();
+        writer.close();
+
+        // default: will always override if exists or create new
+        OutputStream outputStream = Files.newOutputStream(Paths.get(pathDirectory.toString(), "CreateMeWithStream.txt"));
+        outputStream.write(new byte[]{'h','i','!'});
+        outputStream.flush();
+        outputStream.close();
+
+        System.out.println(Paths.get(pathDirectory.toString() + "../././").toRealPath());
+        System.out.println(Paths.get("someRandomStuff/" + "../././").toAbsolutePath());
+
+        Stream.of().forEach(o -> ++x);
+
+        Assertions.assertNotEquals(
+                Paths.get("./"),
+                makeAbsolute(Paths.get("./"))
+        );
+
+        Assertions.assertTrue(
+                Files.isSameFile(
+                        Paths.get("./"),
+                        makeAbsolute(Paths.get("./"))));
+
+
+        System.out.println(makeAbsolute(Paths.get("./")));
+
+        System.out.println(Paths.get(".").toAbsolutePath());
+
+    }
+    int x = 3;
+
+    public Path makeAbsolute(Path p) {
+        if(p!=null && !p.isAbsolute())
+            return p.toAbsolutePath();
+        return p;
+        }
+
+    /*
+    Files.copy takes either two paths, an input stream + path, or a path + output stream
+    Files.isSameFile requires handling of IOExceptions
+     */
 }

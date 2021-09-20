@@ -850,15 +850,21 @@ public class RealOcpTest {
         int x =3;
         static int y = 5;
 
+        // final B myB = new B();
+
         class B extends A{
             int test = this.z +1;
             int z = A.this.x;
+            int z2 = x;
             int testSuper = super.y;
 
             // no static (jdk 8 only)
+            static int badIn8 = y;
         }
 
-        static class C {static class D{}} // can extend anything + implement (just not here -- jdk 16)
+        static class C {
+            static class D{static int r = 4;}
+        } // can extend anything + implement (just not here -- jdk 16)
 
     }
 

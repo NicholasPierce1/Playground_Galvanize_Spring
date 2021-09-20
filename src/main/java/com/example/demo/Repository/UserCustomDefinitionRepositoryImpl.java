@@ -45,11 +45,13 @@ public class UserCustomDefinitionRepositoryImpl implements UserCustomDefinitionR
         try {
             final Connection connection = this.dataSource.getConnection();
 
-            System.out.println(connection == null);
-
             assert(connection != null);
 
-            final Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            connection.setAutoCommit(true); // default
+
+            System.out.println(connection == null);
+
+            final Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
             final Query query = this._entityManager.createNativeQuery(
                     "SELECT * FROM USER_CUSTOM, ADDRESS_CUSTOM WHERE " +
@@ -60,8 +62,13 @@ public class UserCustomDefinitionRepositoryImpl implements UserCustomDefinitionR
                     "USER_CUSTOM.ADDRESS = ADDRESS_CUSTOM.ADDRESS_ID;" +
                     "SELECT * FROM USER_CUSTOM;");
             resultSet.beforeFirst();
+            resultSet.relative(1);
+            //resultSet.first(); breaks
+            resultSet.next();
             resultSet.absolute(1000);
-            resultSet.absolute(-90);
+            System.out.println(resultSet.isAfterLast());
+            resultSet.afterLast();
+           //resultSet.absolute(-90);
             /*
              +
                     " SELECT * FROM USER_CUSTOM, ADDRESS_CUSTOM WHERE" +
@@ -115,7 +122,7 @@ public class UserCustomDefinitionRepositoryImpl implements UserCustomDefinitionR
 
             final Statement statement = connection.createStatement();
 
-            connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             /*
             result set type:
             forward only: cursor goes forward only (DEFAULT)

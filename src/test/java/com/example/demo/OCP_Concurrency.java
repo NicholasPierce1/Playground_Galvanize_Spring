@@ -14,21 +14,20 @@ import java.util.stream.Stream;
 
 public class OCP_Concurrency {
 
-    static class MyRunnable implements Runnable{
+    static class MyRunnable implements Runnable {
 
         @Override
         public void run() {
             try {
                 Thread.sleep(1000);
                 System.out.println("runnable done");
-            }
-            catch(InterruptedException e){
+            } catch (InterruptedException e) {
                 System.out.println("oops");
             }
         }
     }
 
-    static class MyThread extends Thread{
+    static class MyThread extends Thread {
         @Override
         public void run() {
             System.out.println("thread done");
@@ -36,7 +35,7 @@ public class OCP_Concurrency {
     }
 
     @Test
-    public void testConcurrencyOne() throws InterruptedException{
+    public void testConcurrencyOne() throws InterruptedException {
         System.out.println("start");
         // thread 2 (thread override)
         final Thread threadOne = new MyThread();
@@ -55,7 +54,7 @@ public class OCP_Concurrency {
     }
 
     @Test
-    public void testSingleThreadExecutor()throws InterruptedException, ExecutionException {
+    public void testSingleThreadExecutor() throws InterruptedException, ExecutionException {
         ExecutorService service = null;
         try {
             service = Executors.newSingleThreadExecutor();
@@ -75,22 +74,23 @@ public class OCP_Concurrency {
             service.execute(() -> System.out.println("Printing zoo inventory"));
 
             // future
-            Future<?> myFuture = service.submit( () -> {
-                for (int i = 0; i < 3; i++) {
-                    System.out.println("Printing record: " + i);
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+            Future<?> myFuture = service.submit(() -> {
+                        for (int i = 0; i < 3; i++) {
+                            System.out.println("Printing record: " + i);
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
-                }}
             );
             System.out.println("before: " + myFuture.isCancelled() + " " + myFuture.isDone());
             myFuture.get();
-            System.out.println("after: "  + myFuture.isCancelled() + " " + myFuture.isDone());
+            System.out.println("after: " + myFuture.isCancelled() + " " + myFuture.isDone());
 
             // Future with data
-            final Future<? extends Integer> myDataFuture = service.<Integer>submit( () -> 10);
+            final Future<? extends Integer> myDataFuture = service.<Integer>submit(() -> 10);
             System.out.println("data: " + myDataFuture.get());
             final Future<?> badFuture; // can't get thread running it :(
             try {
@@ -99,8 +99,7 @@ public class OCP_Concurrency {
                 });
                 System.out.println("starting the bad boy");
                 badFuture.get();
-            }
-            catch(InterruptedException | ExecutionException e){
+            } catch (InterruptedException | ExecutionException e) {
                 System.out.println("bad boy caught " + e.getMessage());
                 System.out.println(e instanceof ExecutionException);
             }
@@ -108,46 +107,46 @@ public class OCP_Concurrency {
 
             System.out.println("end");
         } finally {
-            if(service != null) service.shutdown();
+            if (service != null) service.shutdown();
         }
     }
 
     @Test
-    public void crazyLongThreadTest(){
-        final ExecutorService singleThreadService = Executors.newSingleThreadExecutor();;
-        try{
+    public void crazyLongThreadTest() {
+        final ExecutorService singleThreadService = Executors.newSingleThreadExecutor();
+        ;
+        try {
             //singleThreadService = Executors.newSingleThreadExecutor();
             final Future<?> allDayAllNight = singleThreadService.submit(
                     () -> {
-                        for(int i = 0; i < 100000; i++);
+                        for (int i = 0; i < 100000; i++) ;
                     }
             );
             //singleThreadService.submit((Callable<?>)()->null);
 
             allDayAllNight.get(1, TimeUnit.DAYS);
-        }
-        catch(TimeoutException e){
+        } catch (TimeoutException e) {
 
-        }
-        catch(InterruptedException | ExecutionException e){
+        } catch (InterruptedException | ExecutionException e) {
 
-        }
-        finally {
-            if(singleThreadService != null)
+        } finally {
+            if (singleThreadService != null)
                 singleThreadService.shutdown();
         }
     }
 
     @Test
-    public void testScheduling(){
+    public void testScheduling() {
         final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        try{
-           final ScheduledFuture<?> future =
-                   executorService.schedule( ()->System.out.println("finished"), 2, TimeUnit.SECONDS );
-           future.get(); //(will wait)
+        try {
+            final ScheduledFuture<?> future =
+                    executorService.schedule(() -> System.out.println("finished"), 2, TimeUnit.SECONDS);
+            future.get(); //(will wait)
 
             executorService.schedule(
-                    ()->{throw new Exception();},
+                    () -> {
+                        throw new Exception();
+                    },
                     1,
                     TimeUnit.MICROSECONDS
             );
@@ -161,27 +160,24 @@ public class OCP_Concurrency {
             scheduleAtFixedRate: if thread takes longer than rate allotted then multiple threads scheduled to do same thing
             scheduleAtFixedDelay: when one ends then the delay starts before the next (can't tell when it goes however)
              */
-        }
-        catch(InterruptedException | ExecutionException e){
+        } catch (InterruptedException | ExecutionException e) {
 
-        }
-        catch(Exception e){
+        } catch (Exception e) {
 
-        }
-        finally {
-            if(executorService != null)
+        } finally {
+            if (executorService != null)
                 executorService.shutdown();
         }
     }
 
     // ------------------
 
-    static final class Counter{
-        private Integer x =0;
+    static final class Counter {
+        private Integer x = 0;
 
         private static final Integer y = 0;
 
-        static void waitHere() throws InterruptedException{
+        static void waitHere() throws InterruptedException {
             synchronized (Counter.class) {
                 System.out.println("S1 Start");
                 Thread.sleep(2000);
@@ -189,29 +185,29 @@ public class OCP_Concurrency {
             }
         }
 
-        synchronized static void waitHere1() throws InterruptedException{
+        synchronized static void waitHere1() throws InterruptedException {
             System.out.println("S2 Start");
             Thread.sleep(1000);
             System.out.println("S2 End");
         }
 
-        synchronized static void waitHere2() throws InterruptedException{
+        synchronized static void waitHere2() throws InterruptedException {
             System.out.println("S3 Start-End");
         }
 
-        synchronized static void waitHere3() throws InterruptedException{
+        synchronized static void waitHere3() throws InterruptedException {
             System.out.println("S4 Start");
             Thread.sleep(1000);
             System.out.println("S4 End");
         }
 
-        int incrementAndReturn(){
+        int incrementAndReturn() {
             synchronized (this.x) {
                 return ++this.x;
             }
         }
 
-        void testInstanceLock1(){
+        void testInstanceLock1() {
             try {
                 synchronized (this.x) {
                     System.out.println("I2 Field Lock Obtained");
@@ -220,21 +216,19 @@ public class OCP_Concurrency {
                 }
 //                Thread.sleep(0);
 //                System.out.println("I2 Start-End");
-            }
-            catch(InterruptedException e){
+            } catch (InterruptedException e) {
                 System.out.println("oops");
             }
         }
 
-        void testInstanceLock2(){
+        void testInstanceLock2() {
             try {
                 synchronized (x) {
                     System.out.println("I3 Field Lock Obtained");
                     Thread.sleep(1000);
                     System.out.println("I3 Field Lock Released");
                 }
-            }
-            catch(InterruptedException e){
+            } catch (InterruptedException e) {
                 System.out.println("oops");
             }
         }
@@ -248,30 +242,29 @@ public class OCP_Concurrency {
 //                }
                 //Thread.sleep(1000);
                 //this.waitHere1();
-            }
-            catch(InterruptedException e){
+            } catch (InterruptedException e) {
                 System.out.println("oops");
             }
             System.out.println("I1 End");
         }
 
-        synchronized int doItAgain(){
+        synchronized int doItAgain() {
             return ++this.x;
         }
     }
 
-    static final class AtomicCounter{
+    static final class AtomicCounter {
         private AtomicInteger x = new AtomicInteger(0);
 
-        int incrementAndReturn(){
-           return this.x.incrementAndGet();
+        int incrementAndReturn() {
+            return this.x.incrementAndGet();
         }
 
-        void printSomething(){
-            class Inner{
+        void printSomething() {
+            class Inner {
                 final int x = AtomicCounter.this.x.get();
 
-                void test(){
+                void test() {
                     System.out.println(this.x);
                 }
             }
@@ -282,60 +275,56 @@ public class OCP_Concurrency {
     }
 
     @Test
-    public void testConcurrencyWithSynchronization(){
+    public void testConcurrencyWithSynchronization() {
         final Counter counter = new Counter();
         final ExecutorService executorService = Executors.newFixedThreadPool(10);
-        try{
+        try {
             Collection<Callable<Integer>> incrementCallables = new ArrayList<Callable<Integer>>();
 
-            for(int i = 0; i < 10; i++)
+            for (int i = 0; i < 10; i++)
                 incrementCallables.add(counter::incrementAndReturn);
 
-            final List<Future<Integer>> futureList =  executorService.<Integer>invokeAll(incrementCallables);
+            final List<Future<Integer>> futureList = executorService.<Integer>invokeAll(incrementCallables);
 
-            for(final Future<? extends Integer> future: futureList)
+            for (final Future<? extends Integer> future : futureList)
                 System.out.println("value is: " + future.get());
-        }
-        catch(InterruptedException | ExecutionException e){
+        } catch (InterruptedException | ExecutionException e) {
             System.out.println("oops");
-        }
-        finally{
-            if(executorService != null)
+        } finally {
+            if (executorService != null)
                 executorService.shutdown();
         }
     }
 
     @Test
-    public void testConcurrencyWithAtomic(){
+    public void testConcurrencyWithAtomic() {
         final AtomicCounter atomicCounter = new AtomicCounter();
         final ExecutorService executorService = Executors.newFixedThreadPool(10);
-        try{
+        try {
 
             final Collection<Callable<Integer>> callables = new ArrayDeque<Callable<Integer>>();
 
-            for(int i = 0; i < 10; i++)
+            for (int i = 0; i < 10; i++)
                 callables.add(atomicCounter::incrementAndReturn);
 
             final List<? extends Future<Integer>> futures = executorService.invokeAll(callables);
 
-            for(final Future<? extends Integer> future: futures)
+            for (final Future<? extends Integer> future : futures)
                 System.out.println("value is: " + future.get());
 
-        }
-        catch(InterruptedException | ExecutionException | CancellationException e){
+        } catch (InterruptedException | ExecutionException | CancellationException e) {
             System.out.println("oops");
-        }
-        finally{
-            if(executorService != null)
+        } finally {
+            if (executorService != null)
                 executorService.shutdown();
         }
     }
 
     @Test
-    public void testStaticConcurrency(){
+    public void testStaticConcurrency() {
         final Counter counter = new Counter();
         final ExecutorService executorService = Executors.newFixedThreadPool(10);
-        try{
+        try {
 
             final Runnable runnable = counter::saySomething;
 
@@ -344,39 +333,35 @@ public class OCP_Concurrency {
             final Runnable instanceRunnableTwo = counter::testInstanceLock2;
 
 
-            final Runnable runnable1 = () ->{
-                try{
+            final Runnable runnable1 = () -> {
+                try {
                     Counter.waitHere1();
-                }
-                catch (InterruptedException e){
+                } catch (InterruptedException e) {
                     System.out.println(e.getMessage());
                 }
             };
 
-            final Runnable runnable2 = () ->{
-                try{
+            final Runnable runnable2 = () -> {
+                try {
                     Counter.waitHere2();
-                }
-                catch (InterruptedException e){
+                } catch (InterruptedException e) {
                     System.out.println(e.getMessage());
                 }
             };
 
-            final Runnable runnable3 = () ->{
-                try{
+            final Runnable runnable3 = () -> {
+                try {
                     Counter.waitHere3();
-                }
-                catch (InterruptedException e){
+                } catch (InterruptedException e) {
                     System.out.println(e.getMessage());
                 }
             };
 
             // static start
             executorService.submit(() -> {
-                try{
+                try {
                     Counter.waitHere();
-                }
-                catch (InterruptedException i){
+                } catch (InterruptedException i) {
                     System.out.println(i.getMessage());
                 }
             });
@@ -395,18 +380,16 @@ public class OCP_Concurrency {
             executorService.submit(runnable3);
 
             Thread.sleep(6000);
-        }
-        catch(InterruptedException | RuntimeException e){
+        } catch (InterruptedException | RuntimeException e) {
             System.out.println("oops");
-        }
-        finally{
-            if(executorService != null)
+        } finally {
+            if (executorService != null)
                 executorService.shutdown();
         }
     }
 
     @Test
-    public void testConcurrencyCollectionQueue(){
+    public void testConcurrencyCollectionQueue() {
         try {
             BlockingQueue<Integer> blockingQueue = new LinkedBlockingQueue<>();
             blockingQueue.offer(39);
@@ -435,14 +418,14 @@ public class OCP_Concurrency {
     }
 
     @Test
-    public void testConcurrencySetAndMap(){
+    public void testConcurrencySetAndMap() {
         // tree map
         NavigableMap<String, Integer> skipListMap = new ConcurrentSkipListMap<>();
 
         skipListMap.put("hello", 10);
         skipListMap.put("Hello", 100);
         System.out.println(skipListMap);
-        skipListMap.merge("hello", 10, (o, n) -> (int)Math.pow(o, n));
+        skipListMap.merge("hello", 10, (o, n) -> (int) Math.pow(o, n));
         System.out.println(skipListMap);
 
         TreeMap<String, Integer> map = new TreeMap<>();
@@ -450,7 +433,7 @@ public class OCP_Concurrency {
         map.put("Hello", 100);
         map.put("1", 2);
         System.out.println(map);
-        map.merge("hello", 10, (o, n) -> o*n);
+        map.merge("hello", 10, (o, n) -> o * n);
         System.out.println(map);
 
         // tree set
@@ -460,19 +443,19 @@ public class OCP_Concurrency {
         stringNavigableSet.add("hello");
         stringNavigableSet.add("Hello");
         stringNavigableSet.add("1");
-        if(!stringNavigableSet.remove("idk"))
+        if (!stringNavigableSet.remove("idk"))
             System.out.println(stringNavigableSet.contains("1"));
         System.out.println(stringNavigableSet.ceiling("Helloo"));
         System.out.println(stringNavigableSet);
 
         // list (copy on write)
-        List<Integer> list = new CopyOnWriteArrayList<>(Arrays.asList(4,3,52));
-        for(Integer item: list) {
-            System.out.print(item+" ");
+        List<Integer> list = new CopyOnWriteArrayList<>(Arrays.asList(4, 3, 52));
+        for (Integer item : list) {
+            System.out.print(item + " ");
             list.add(9);
         }
         System.out.println();
-        System.out.println("Size: "+list.size());
+        System.out.println("Size: " + list.size());
         System.out.println(list);
 //        Stream.of(1,2,3).collect(
 //                ArrayList::new,
@@ -482,21 +465,24 @@ public class OCP_Concurrency {
     }
 
     @Test
-    public void testConcurrentCollectionsWithParallelStreams(){
+    public void testConcurrentCollectionsWithParallelStreams() {
         Stream<String> ohMy = Stream.of("lions", "tigers", "bears").unordered().parallel();
         Stream<String> ohMy1 = Stream.of("lions", "tigers", "bears").parallel();
         Stream<String> ohMy2 = Stream.of("lions", "tigers", "bears").parallel();
 
         ConcurrentMap<Integer, String> map = ohMy
-                .collect(Collectors.toConcurrentMap(String::length, k -> k,
-                        (s1, s2) -> s1 + "," + s2));
+                .collect(Collectors.toConcurrentMap(
+                        String::length,
+                        k -> k,
+                        (s1, s2) -> s1 + "," + s2)
+                );
         System.out.println(map); // {5=lions,bears, 6=tigers}
         System.out.println(map.getClass()); // java.util.concurrent.ConcurrentHashMap
 
         ConcurrentMap<Integer, LinkedList<String>> map1 =
                 ohMy1.collect(
                         Collectors.groupingByConcurrent(
-                                String::length,
+                                String::length, ConcurrentHashMap::new, // optional
                                 Collectors.toCollection( // already given that it's a concurrent map
                                         // could be, on circumstance, Collectors.toList()
                                         LinkedList::new
@@ -541,7 +527,7 @@ public class OCP_Concurrency {
             System.out.println("Adding animals");
         }
 
-//        public void performTask() {
+        //        public void performTask() {
 //            synchronized (this) {
 //                removeAnimals();
 //                cleanPen();
@@ -549,17 +535,16 @@ public class OCP_Concurrency {
 //            }
 //        }
         public void performTask(final CyclicBarrier removeAnimals, final CyclicBarrier cleanPen) {
-               try {
-                   removeAnimals();
-                   removeAnimals.await();
-                   cleanPen();
-                   cleanPen.await();
-                   addAnimals();
-               }
-               catch(InterruptedException | BrokenBarrierException e){
-                   System.out.println(e.getMessage());
-               }
+            try {
+                removeAnimals();
+                removeAnimals.await();
+                cleanPen();
+                cleanPen.await();
+                addAnimals();
+            } catch (InterruptedException | BrokenBarrierException e) {
+                System.out.println(e.getMessage());
             }
+        }
     }
 
 
@@ -568,17 +553,59 @@ public class OCP_Concurrency {
         ExecutorService service = null;
         try {
             CyclicBarrier removeAnimals = new CyclicBarrier(2);
-            CyclicBarrier cleanThePens = new CyclicBarrier(2, ()-> System.out.println("pens are cleaned"));
+            CyclicBarrier cleanThePens = new CyclicBarrier(2, () -> System.out.println("pens are cleaned"));
 
             service = Executors.newFixedThreadPool(4);
             LionPenManager manager = new LionPenManager();
-            for(int i=0; i<2; i++)
-                service.submit(() -> manager.performTask(removeAnimals,cleanThePens));
+            for (int i = 0; i < 2; i++)
+                service.submit(() -> manager.performTask(removeAnimals, cleanThePens));
         } finally {
-            if(service != null) service.shutdown();
+            if (service != null) service.shutdown();
         }
     }
 
+    @Test
+    public void testRandom() {
+        Arrays.asList(1, 2, 3, 4).stream()
+                .forEach(System.out::println);
+        Arrays.asList(1, 2, 3, 4).parallelStream() // not parallel
+                .forEachOrdered(System.out::println);
+
+        Callable c = new Callable() {
+            public Object call() throws Exception {
+                return 10;
+            }
+        };
+
+        //Executors.newCachedThreadPool().invokeAny(null);
+        Future<? super Integer> future = Executors.newSingleThreadExecutor().<Integer>submit(() -> 3);
+        // must shutdown first
+        //Executors.newSingleThreadExecutor().awaitTermination(1, TimeUnit.DAYS);
+    }
+
+    public static String concat1(List<String> values) {
+        return values.parallelStream().unordered()
+                .reduce("a",
+                        (x, y) -> x + y,
+                        String::concat);
+    }
+
+    public static String concat2(List<String> values) {
+        //values.parallelStream().reduce("a", String::concat);
+        return values.parallelStream()
+                .reduce((w, z) -> z + w).orElseThrow();
+    }
+
+    @Test
+    public void testReducers() {
+        List<String> list = Arrays.asList("Big", "Hat", "Cat");
+        //list.sort(Comparator.reverseOrder());
+        String x = concat1(list);
+        String y = concat2(list);
+        System.out.println(x + ":" + y);
+        //Future<? extends Number> future = Executors.newSingleThreadExecutor().submit(() -> (Integer)1);
+        //Executors.newSingleThreadExecutor().execute(System.out::println);
+    }
 }
 
 

@@ -53,8 +53,8 @@ public class OCP_Fork_Pool {
         // creates fork join pool to encapsulate the executor's creation, scheduling, and thread management
         ForkJoinPool pool = new ForkJoinPool();
 
-        pool.<Void>invoke(task); // returns the Void
-
+        Void voided = pool.<Void>invoke(task); // returns the Void
+        pool.shutdown();
         // Print results
         System.out.println();
         System.out.print("Weights: ");
@@ -142,6 +142,7 @@ public class OCP_Fork_Pool {
         //Consumer<Integer> blah = (i) -> Integer.sum(i, 3);
         service.shutdown();
     }
+
 
     static int counter =0;
 

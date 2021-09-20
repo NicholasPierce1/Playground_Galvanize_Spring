@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.Transient;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +32,7 @@ public class OCP_IO_One {
     final File bufferStreamTestFile = new File(testDirectory, "bufferTestFile.txt");
     final File printStreamFile = new File(testDirectory, "printStreamFile.txt");
 
-    static boolean terminate = false;
+    private static boolean terminate = false;
 
     @BeforeAll
     public void doTerminate(){
@@ -152,8 +155,6 @@ public class OCP_IO_One {
         @JsonIgnore // only valid in a context where JacksonJson is default serialization
         public boolean z = true;
 
-        public transient RealOcpTest.A tranVar = new RealOcpTest().new A();
-
 //        public RealOcpTest.A getTranVar() {
 //            return tranVar;
 //        } // if getter is set then defaulted to null value and won't be set when de-serialize (default persists)
@@ -163,6 +164,10 @@ public class OCP_IO_One {
         private final int a = 100;
 
         public String name = "myName";
+
+        {
+            name = "myNameButInitialized";
+        }
 
         @Override
         public String toString(){
@@ -404,4 +409,26 @@ public class OCP_IO_One {
 //            console.printf("Your excitement level is: " + excitementAnswer);
 //        }
 //    }
+
+    @Test
+    public void testRandom() throws IOException{
+        //Files.readAttributes(fileOne.toPath(), BasicFileAttributes.class).size();
+        //new PrintWriter(fileOne);
+        //new FileInputStream(fileThree).mark(1);
+        System.out.println(File.pathSeparator);
+        new BufferedReader(new FileReader(fileThree)).skip(1); // gives back how many chars were skipped
+        Console console = System.console();
+        //new FileInputStream(fileThree).read(new byte[3]);
+        new FileWriter(testDirectory.getPath() + "/testCreate.txt").write("");
+        System.out.println(new File("relative.txt").getPath());
+
+    }
+
+    class A implements  AutoCloseable{
+        public void close(){}
+    }
+
+    /*
+    1) cannot create console's directly
+     */
 }
