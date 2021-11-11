@@ -104,7 +104,6 @@ public class OCP_Concurrency {
                 System.out.println(e instanceof ExecutionException);
             }
 
-
             System.out.println("end");
         } finally {
             if (service != null) service.shutdown();
@@ -114,7 +113,7 @@ public class OCP_Concurrency {
     @Test
     public void crazyLongThreadTest() {
         final ExecutorService singleThreadService = Executors.newSingleThreadExecutor();
-        ;
+
         try {
             //singleThreadService = Executors.newSingleThreadExecutor();
             final Future<?> allDayAllNight = singleThreadService.submit(

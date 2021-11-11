@@ -1,5 +1,6 @@
 package com.example.demo;
 
+import com.sun.istack.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,9 @@ import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class OCP_IO_Two {
@@ -582,4 +586,89 @@ public class OCP_IO_Two {
     Files.copy takes either two paths, an input stream + path, or a path + output stream
     Files.isSameFile requires handling of IOExceptions
      */
+
+    @Test
+    public void testCreateTempFile(){
+
+        if(terminate)
+            return;
+
+        final File tempFile = Paths.get(pathDirectory.toAbsolutePath().toString(), "/myNewFile.txt").toFile();
+        System.out.println(tempFile.getPath());
+
+        if(tempFile.exists())
+            tempFile.delete();
+
+        // creates temporary file
+        // prefix (start of name of file)
+        // suffix (file type)
+        // file (directory location)
+        try {
+            final File createdTempFile =
+                    File.createTempFile(tempFile.getName().replaceFirst("\\..{0,}",""), ".txt", tempFile.getParentFile());
+
+            System.out.println(createdTempFile.getPath());
+
+            createdTempFile.deleteOnExit();
+        }
+        catch(IOException ex){
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    @Test
+    public void createZipFile(){
+
+        if(terminate)
+            return;
+
+        final Path zipPath = Paths.get(pathDirectory.toAbsolutePath().toString(), "/zipFile.zip");
+
+        try(final FileOutputStream fileOutputStream = new FileOutputStream(zipPath.toFile());
+            final ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
+            final FileInputStream inputStream = new FileInputStream(pathTwo.toFile())){
+
+            System.out.println(zipPath.getFileName().toString());
+            System.out.println(zipPath.getName(zipPath.getNameCount() - 1));
+            final ZipEntry zipEntry = new ZipEntry(zipPath.getFileName().toString());
+
+            zipOutputStream.putNextEntry(zipEntry);
+
+            zipOutputStream.write(inputStream.readAllBytes());
+
+            Assertions.assertTrue(Files.exists(zipPath));
+
+            System.out.println(zipPath);
+
+        }
+        catch(IOException ex){
+            Assertions.fail(ex);
+        }
+
+        Assertions.assertDoesNotThrow(() -> readZipFile(zipPath));
+
+    }
+
+    private void readZipFile(@NotNull final Path zipPath) throws IOException{
+
+        try(final FileInputStream fileInputStream = new FileInputStream(zipPath.toFile());
+            final ZipInputStream zipInputStream = new ZipInputStream(fileInputStream)){
+
+            ZipEntry zipEntry;
+
+            while((zipEntry = zipInputStream.getNextEntry()) != null) {
+                System.out.println(zipEntry.getName());
+                System.out.println(zipEntry.getSize());
+                System.out.println(zipEntry.getCompressedSize());
+                byte[] data = zipInputStream.readAllBytes();
+                System.out.print("message: ");
+                for(final byte character: data)
+                    System.out.print((char)character);
+                System.out.println();
+            }
+
+        }
+
+    }
+
 }

@@ -1,9 +1,11 @@
 package com.example.demo;
 
+import com.sun.istack.NotNull;
 import org.apache.tomcat.jni.Local;
 import org.apache.zookeeper.Shell;
 import org.junit.jupiter.api.Test;
 import scala.Int;
+import scala.Some;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -278,6 +280,8 @@ public class OCP_Test_Question_Context {
         System.out.println(
                 Paths.get("/").getParent()
         );
+
+        System.out.println(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy")));
    }
 
    static int getInt(){return 3;}
@@ -312,5 +316,87 @@ public class OCP_Test_Question_Context {
         }
 
         test_question_context.new InnerMemberClass();
+    }
+
+    @Test
+    public void Blah(){
+        SomeClass instance = new SomeClass(3);
+
+        SomeClass.x++;
+        instance.y++; // instance
+        instance.x++; // instance can access static
+
+        System.out.println(instance == instance.blah());
+
+    }
+
+    public class SomeClass{
+        static int x;
+        int y;
+
+        SomeClass(){}
+
+        SomeClass(int y){
+            this();
+            this.y = y;
+        }
+
+        public SomeClass blah(){
+            SomeClass alsoThis = this;
+            return alsoThis; // this is ITSELF
+        }
+    }
+
+    public static class AA{
+        // hiding
+        // static, variable, or private
+        static void A(){
+            System.out.println("A");
+        }
+
+        int a = 0;
+
+        private void doSomething(){
+            System.out.println("Something - A");
+        }
+
+        public Collection<?> giveList() throws IOException{return new ArrayList<>();}
+
+    }
+
+    public static class BB extends AA{
+
+        static void A(){
+            System.out.println("B");
+        }
+
+        int a = 1;
+
+        private void doSomething(){
+            System.out.println("Something - B");
+        }
+
+        public static void main(String[] args){
+            final AA bb = new BB();
+            /*
+            if hiding: DATA TYPE not reference type
+            if overriding: REFERENCE TYPE not data type
+             */
+
+            bb.A();
+            System.out.println(bb.a);
+            bb.doSomething();
+        }
+
+        public Vector<?> giveList() throws Error{
+            return new Vector<>();
+        }
+
+    }
+
+    @Test
+    public void testRandom1(){
+        int[] ar = {1};
+
     }
 }

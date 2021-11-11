@@ -10,9 +10,12 @@ import java.util.Date;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FlightInfo {
 
-//    @JsonProperty(value = "destination")
+    private FlightInfo(){}
+
+//    @JsonProperty(required = true)
     private String landsAt = "Tampa Bay International";
 
+    @JsonProperty(required = false)
     private double capacity = 100;
 
     @JsonProperty("safe")
@@ -24,7 +27,7 @@ public class FlightInfo {
     @JsonIgnore()
     private String secretInfo = "is actually not safeeee";
 
-//    @JsonProperty(required = true, defaultValue = "[\"hello\", \"world\"]")
+//    @JsonProperty(value = "myArray", required = true, defaultValue = "[\"hello\", \"world\"]")
     private String[] myArray = {"hello?"};
 
     public boolean isSafe() {
@@ -35,7 +38,7 @@ public class FlightInfo {
         return capacity;
     }
 
-//    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-dd-MM")
     public LocalDate getMyDate() {
         return myDate;
     }
@@ -49,7 +52,8 @@ public class FlightInfo {
         return secretInfo;
     }
 
-    public String[] getMyArray() {
+    @JsonGetter(value = "myArray")
+    private String[] getMyArray() {
         return myArray;
     }
 

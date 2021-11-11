@@ -3,19 +3,18 @@ package com.example.demo.Repository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.bytebuddy.implementation.auxiliary.AuxiliaryType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Parameter;
-import javax.persistence.Query;
+import javax.persistence.*;
 import javax.sql.DataSource;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.sql.*;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 
 @Component
@@ -51,7 +50,27 @@ public class UserCustomDefinitionRepositoryImpl implements UserCustomDefinitionR
 
             System.out.println(connection == null);
 
-            final Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            EntityTransaction entityTransaction = null;
+
+            try {
+
+                entityTransaction = _entityManager.getTransaction();
+
+                entityTransaction.begin();
+
+               // _entityManager.createStoredProcedureQuery("")
+
+                entityTransaction.commit();
+            }
+            catch (RuntimeException e) {
+                if ( entityTransaction != null) entityTransaction.rollback();
+                throw e; // or display error message
+            }
+//            finally {
+//                em.close();
+//            }
+
+            final Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 
             final Query query = this._entityManager.createNativeQuery(
                     "SELECT * FROM USER_CUSTOM, ADDRESS_CUSTOM WHERE " +
@@ -68,6 +87,20 @@ public class UserCustomDefinitionRepositoryImpl implements UserCustomDefinitionR
             resultSet.absolute(1000);
             System.out.println(resultSet.isAfterLast());
             resultSet.afterLast();
+
+            // shows how to update a row
+            if(!resultSet.isAfterLast()){
+
+                resultSet.updateString(2, "new name here");
+
+                // if commit has auto commit than when you update row this will take effect
+                resultSet.updateRow(); // resultSet.cancelRowUpdates();
+
+                // else you need to commit the transaction
+                connection.commit(); // connection.rollback();
+
+            }
+
            //resultSet.absolute(-90);
             /*
              +

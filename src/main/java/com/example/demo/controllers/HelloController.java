@@ -6,14 +6,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -130,7 +133,7 @@ public class HelloController {
 
         final ArrayList<String> list = new ArrayList<>();
 
-        //params.forEach( (x,y) -> {list.add(String.format("%s-%s"));} );
+        params.forEach( (x,y) -> {list.add(String.format("%s-%s", x, Arrays.stream(y).reduce((a,c) -> a+c)));} );
 
         return null;
     }
@@ -141,7 +144,7 @@ public class HelloController {
             method = RequestMethod.GET
     )
     public @NotNull FlightInfo getFlightInfo(){
-        return new FlightInfo();
+        return null; //new FlightInfo();
     }
 
     @RequestMapping(
@@ -186,6 +189,20 @@ public class HelloController {
         //System.out.println("Did it set the ignore value? " + flightInfo.getSecretInfo().equals("scary flight"));
 
         return objectMapper.readValue(jsonString, FlightInfo.class);
+    }
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @RequestMapping(
+            value = "/testServlet",
+            method = RequestMethod.GET
+    )
+    public boolean UseServletRequest(final HttpServletRequest httpServletRequest){
+
+        //final Map<String, Object> servletMap = (Map<String, Object>)objectMapper.convertValue(httpServletRequest, Map.class);
+        System.out.println(httpServletRequest.getRequestURI());
+        return true;
     }
 
 }

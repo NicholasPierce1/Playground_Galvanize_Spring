@@ -3,6 +3,7 @@ package com.example.demo.controllers;
 import com.example.demo.Repository.UserCustomRepository;
 import com.example.demo.Repository.UserRepository;
 import com.example.demo.domain.User;
+import com.example.demo.domain.UserCustom;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +27,14 @@ public class UserCustomController {
     public boolean getUsers(){
         this._userCustomRepository.getAllUsers();
         return true;
+    }
+
+    @RequestMapping(
+            value= {"/getAll", "/getAll/"},
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Iterable<UserCustom> getAllUsers(){
+        return this._userCustomRepository.findAll();
     }
 
     @RequestMapping(

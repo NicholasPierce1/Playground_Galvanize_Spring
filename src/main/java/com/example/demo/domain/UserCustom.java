@@ -3,7 +3,7 @@ import org.apache.tomcat.jni.Address;
 
 import javax.persistence.*;
 
-@Entity(name = "userCustom")
+@Entity(name = "user_custom")
 public class UserCustom {
 
     @Id

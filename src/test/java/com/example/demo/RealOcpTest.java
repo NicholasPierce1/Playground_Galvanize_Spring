@@ -509,6 +509,7 @@ public class RealOcpTest {
         Period fiveWeeks = Period.of(0, 0, 35);
         System.out.println(threeWeeks);
         System.out.println(fiveWeeks);
+        System.out.println(fiveWeeks);
 
         Duration twoHours = Duration.ofHours(2); // (P2H)
         Duration twoHoursAgain = Duration.of(2, ChronoUnit.HOURS); // (PT2H)
@@ -673,7 +674,7 @@ public class RealOcpTest {
 
         System.out.println(usNumberFormat.format(100_000.59));
         System.out.println(gNumberFormat.format(100_000.59));
-        System.out.println(cNumberFormat.format(100_000.59));
+        System.out.println(cNumberFormat.format(1000_00.59));
 
         System.out.println();
 
