@@ -8,7 +8,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 
-@JsonIgnoreProperties(value = {"test_3"})
+@JsonIgnoreProperties(value = {"test_3"}, ignoreUnknown = true)
 public class JsonMapperTest {
 
     @JsonProperty(value = "test_1")

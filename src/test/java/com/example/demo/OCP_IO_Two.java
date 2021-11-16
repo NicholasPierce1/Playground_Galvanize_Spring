@@ -1,10 +1,16 @@
 package com.example.demo;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.istack.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.*;
 import java.net.URI;
@@ -28,6 +34,9 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+//@SpringBootTest
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes ={DemoApplication.class, ConfigurationFile.class} )
 public class OCP_IO_Two {
 
     final Path pathOne = Paths.get("C://Test/Files/NIO/fileOne.txt");
@@ -669,6 +678,21 @@ public class OCP_IO_Two {
 
         }
 
+    }
+
+    enum Blah{a,b}
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @Test
+    public void blah() throws Exception{
+        Stream.of(1,2,3,4).filter((num) -> num > 2).forEach(System.out::println);
+        Blah enum_blah = Blah.valueOf("a");
+        System.out.println(enum_blah);
+        String enum_value = this.objectMapper.writeValueAsString(enum_blah);
+        enum_blah = this.objectMapper.readValue(enum_value, Blah.class);
+        System.out.println(enum_blah);
     }
 
 }

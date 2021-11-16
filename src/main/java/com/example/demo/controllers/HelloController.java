@@ -6,6 +6,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +25,13 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 @RestController
 public class HelloController {
 
+    private static Logger logger = LoggerFactory.getLogger(HelloController.class);
+
     @GetMapping("/")
     public String helloWorld() {
+
+        logger.info("hello world from logger!");
+
         return "Hello from Spring!";
     }
 

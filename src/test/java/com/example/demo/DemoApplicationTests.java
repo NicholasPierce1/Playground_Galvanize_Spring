@@ -22,14 +22,18 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.json.JSONObject;
+import org.springframework.test.context.jdbc.Sql;
 
 
 @SpringBootTest
@@ -195,6 +199,9 @@ class DemoApplicationTests {
 		System.out.println("subtype " + ((ClassB)jsonMapperTest.getClassA()).getZ());
 		System.out.println(this.objectMapper.writeValueAsString(jsonMapperTest.getClassAList()));
 
+		String jsonMapper = this.objectMapper.writeValueAsString(objectHashMap);
+		System.out.println("string version of map: " + jsonMapper);
+		System.out.println(this.objectMapper.convertValue(objectHashMap, JsonMapperTest.class));
 
 	}
 
@@ -529,5 +536,21 @@ class DemoApplicationTests {
 	 class B_Abstract extends A_Abstract{
 		public void doSomething(){}
 	 }
+
+	 @Test
+	public void testRandom() throws ParseException {
+			String dateTimeString =
+					LocalDateTime.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss:SSS"));
+
+		 Date simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss:SSS").parse(dateTimeString);
+		 System.out.println(simpleDateFormat);
+		String replaceReturnFeeds = "\t\n\rhello world\s!";
+		 System.out.println(
+		 		replaceReturnFeeds
+						.replaceAll("^.{0,}$", replaceReturnFeeds)
+						.replaceAll("[\t\n\r]", "")
+						.replaceAll("\s", "_"));
+	}
+
 
 }
