@@ -5,8 +5,10 @@ import com.example.demo.service.MathService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import javax.swing.text.DateFormatter;
@@ -28,5 +30,13 @@ public class ConfigurationFile {
     public @Bean
     MathService getMathService(){
         return new MathService();
+    }
+
+    public @Bean
+    ApplicationContext getXmlApplicationContext(){
+        ApplicationContext ctx = new
+                ClassPathXmlApplicationContext( "applicationContext.xml" );
+
+        return ctx;
     }
 }

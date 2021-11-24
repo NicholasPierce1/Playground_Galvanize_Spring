@@ -4,6 +4,7 @@ import com.example.demo.model.FlightInfo;
 import com.example.demo.model.Task;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -13,7 +14,12 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -205,10 +211,36 @@ public class HelloController {
             value = "/testServlet",
             method = RequestMethod.GET
     )
-    public boolean UseServletRequest(final HttpServletRequest httpServletRequest){
+    public boolean UseServletRequest(final HttpServletRequest httpServletRequest,
+                                     final HttpServletResponse httpServletResponse,
+                                     @RequestBody ArrayList<String> strings) throws Exception{
 
         //final Map<String, Object> servletMap = (Map<String, Object>)objectMapper.convertValue(httpServletRequest, Map.class);
-        System.out.println(httpServletRequest.getRequestURI());
+        System.out.println("URI: " + httpServletRequest.getRequestURI());
+        System.out.println("Path: " + httpServletRequest.getPathInfo());
+        System.out.println("request URL: " + httpServletRequest.getRequestURL());
+        System.out.println("context path: " + httpServletRequest.getContextPath());
+
+        if(httpServletRequest.getCookies() != null) {
+            System.out.println("\nprinting cookies:");
+            Arrays.<Cookie>stream(httpServletRequest.getCookies()).forEach((cookie) -> {
+                System.out.print("key: " + cookie.getName());
+                System.out.print("\tvalue: " + URLDecoder.decode(cookie.getValue() +"\n", StandardCharsets.UTF_8));
+
+            });
+        }
+
+        //Cookie cookieToAdd = new Cookie("name", URLEncoder.encode("some long\svalue", StandardCharsets.UTF_8));
+        // cookies with tomcat >= 8 don't support spaces. Must encode to UT8 between cookie calls
+        // %20 or + = space in URL encoded && %2B = plus sign
+        System.out.println("\nencode: " + URLEncoder.encode("some long\svalue + nothing = long value", StandardCharsets.UTF_8));
+        System.out.println("decode: " +
+                URLDecoder.decode(URLEncoder.encode("some long\svalue + nothing = long value", StandardCharsets.UTF_8), StandardCharsets.UTF_8)
+        );
+        //httpServletResponse.addCookie(cookieToAdd);
+
+        System.out.println(strings);
+
         return true;
     }
 

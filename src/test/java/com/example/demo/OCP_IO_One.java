@@ -421,7 +421,7 @@ public class OCP_IO_One {
         //new FileInputStream(fileThree).read(new byte[3]);
         new FileWriter(testDirectory.getPath() + "/testCreate.txt").write("");
         System.out.println(new File("relative.txt").getPath());
-
+        System.out.println(new File("").getAbsolutePath());
     }
 
     class A implements  AutoCloseable{

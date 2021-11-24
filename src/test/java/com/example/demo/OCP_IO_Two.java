@@ -45,6 +45,8 @@ public class OCP_IO_Two {
 
     final Path pathDirectory = Paths.get(pathOne.getParent().toFile().getPath(), "\\SubFolder/");
 
+    final Path pathZipFolder = Paths.get("C:\\Test\\Files\\NIO\\SubFolder\\ZipThis");
+
     private static boolean terminate = false;
 
     @BeforeAll
@@ -614,11 +616,14 @@ public class OCP_IO_Two {
         // file (directory location)
         try {
             final File createdTempFile =
-                    File.createTempFile(tempFile.getName().replaceFirst("\\..{0,}",""), ".txt", tempFile.getParentFile());
+                    File.createTempFile(tempFile.getName().replaceFirst("\\.d.{0,}",""), ".txt");//, tempFile.getParentFile());
 
             System.out.println(createdTempFile.getPath());
 
             createdTempFile.deleteOnExit();
+
+            Throwable ioException = new IOException("file permissions denied");
+            System.out.println(ioException.getClass().getName() + " : " + ioException.getMessage());
         }
         catch(IOException ex){
             System.out.println(ex.getMessage());
@@ -626,12 +631,14 @@ public class OCP_IO_Two {
     }
 
     @Test
-    public void createZipFile(){
+    public void createZipFile() throws IOException{
 
         if(terminate)
             return;
 
         final Path zipPath = Paths.get(pathDirectory.toAbsolutePath().toString(), "/zipFile.zip");
+
+        Files.deleteIfExists(zipPath); // output stream overwrites but just to make sure
 
         try(final FileOutputStream fileOutputStream = new FileOutputStream(zipPath.toFile());
             final ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
@@ -639,11 +646,40 @@ public class OCP_IO_Two {
 
             System.out.println(zipPath.getFileName().toString());
             System.out.println(zipPath.getName(zipPath.getNameCount() - 1));
-            final ZipEntry zipEntry = new ZipEntry(zipPath.getFileName().toString());
+            ZipEntry zipEntry = new ZipEntry(zipPath.getFileName().toString());
 
+            // zip file
             zipOutputStream.putNextEntry(zipEntry);
 
             zipOutputStream.write(inputStream.readAllBytes());
+
+            zipOutputStream.closeEntry();
+
+            // zip folder
+
+            Files.list(pathZipFolder)
+                    .forEach(
+                            (filePath) -> {
+                                try(InputStream subFileInputStream = Files.newInputStream(filePath, StandardOpenOption.READ)) {
+                                    ZipEntry subZipEntry = new ZipEntry(filePath.toString());
+
+                                    zipOutputStream.putNextEntry(subZipEntry);
+
+                                    System.out.println("subfile : " + subZipEntry.getName());
+
+                                    zipOutputStream.write(subFileInputStream.readAllBytes());
+
+                                    zipOutputStream.closeEntry();
+
+                                }
+                                catch(IOException ex){
+                                    System.out.println(ex.getMessage());
+                                }
+
+                            }
+                    );
+
+
 
             Assertions.assertTrue(Files.exists(zipPath));
 
@@ -665,8 +701,13 @@ public class OCP_IO_Two {
 
             ZipEntry zipEntry;
 
-            while((zipEntry = zipInputStream.getNextEntry()) != null) {
-                System.out.println(zipEntry.getName());
+            read: while((zipEntry = zipInputStream.getNextEntry()) != null) {
+                System.out.println("name: " + zipEntry.getName());
+                System.out.println("Is a directory? " + zipEntry.isDirectory());
+
+                if(zipEntry.isDirectory())
+                    continue read;
+
                 System.out.println(zipEntry.getSize());
                 System.out.println(zipEntry.getCompressedSize());
                 byte[] data = zipInputStream.readAllBytes();
@@ -693,6 +734,17 @@ public class OCP_IO_Two {
         String enum_value = this.objectMapper.writeValueAsString(enum_blah);
         enum_blah = this.objectMapper.readValue(enum_value, Blah.class);
         System.out.println(enum_blah);
+
+        Assertions.assertThrows(
+                InvalidPathException.class,
+                () -> Paths.get("myTextFile|.txt")
+        );
+
+        System.out.println(Arrays.toString(new ArrayList<String>() {{
+            add("1");
+        }}.toArray(new String[0])));
+
+        //System.out.println(pathOne.getFileName());
     }
 
 }

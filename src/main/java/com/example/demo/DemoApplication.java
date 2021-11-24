@@ -1,5 +1,6 @@
 package com.example.demo;
 
+import com.example.demo.model.TestBeanModel;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
@@ -7,12 +8,14 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -27,6 +30,9 @@ public class DemoApplication {
 
 	@Value("kafka.topic.id")
 	String topicId;
+
+	@Autowired
+	ApplicationContext xmlApplicationContext;
 
 	@Autowired
 	ConfigurableEnvironment env; // or just env in same path
@@ -48,16 +54,18 @@ public class DemoApplication {
 
 		final ApplicationContext context = SpringApplication.run(DemoApplication.class, args);
 
+
+		final DemoApplication demoApplication = (DemoApplication)context.getBean("demoApplication");
+
+		final ApplicationContext applicationContext = (ApplicationContext)context.getBean("getXmlApplicationContext");
+
+		demoApplication.env.setActiveProfiles("dev");
+
 		List<String> list = new ArrayList<String>(java.util.Arrays.asList(context.getBeanDefinitionNames()));
 //		System.out.println(list.contains("MongoClient"));
 //		System.out.println(list.contains("mongoClient"));
 		System.out.println(list.contains("demoApplication"));
 		System.out.println("is profile bean found: " + list.contains("getDummyBeanClass"));
-
-
-		final DemoApplication demoApplication = (DemoApplication)context.getBean("demoApplication");
-
-		demoApplication.env.setActiveProfiles("dev");
 
 		// keep defaults (beans which belongs to all profiles, no profile tag, will always be there)
 		// set or add active profiles varying on if you're running dev, prod, or other
@@ -66,6 +74,17 @@ public class DemoApplication {
 		System.out.println(Arrays.toString(demoApplication.env.getDefaultProfiles()));
 
 		System.out.println("kafka value: " + demoApplication.topicId);
+
+		try{
+//			ApplicationContext ctx = new
+//					ClassPathXmlApplicationContext( "applicationContext.xml" );
+//
+			final TestBeanModel  testBeanModel = (TestBeanModel)applicationContext.getBean(TestBeanModel.class);
+			testBeanModel.printSuccess();
+		}
+		catch(Exception ex){
+			System.out.println("oops: " + ex);
+		}
 
 
 //		ConnectionString connectionString = new ConnectionString("mongodb+srv://adminU:adminP@testcluster.elozi.mongodb.net/testDatabase?retryWrites=true&w=majority&ssl=true&authSource=admin&authMechanism=SCRAM-SHA-1");
