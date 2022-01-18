@@ -2,6 +2,7 @@ package com.example.demo.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.bytebuddy.implementation.auxiliary.AuxiliaryType;
+import org.hibernate.JDBCException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.stereotype.Component;
@@ -62,6 +63,7 @@ public class UserCustomDefinitionRepositoryImpl implements UserCustomDefinitionR
 
                 entityTransaction.commit();
             }
+            catch(JDBCException e){}
             catch (RuntimeException e) {
                 if ( entityTransaction != null) entityTransaction.rollback();
                 throw e; // or display error message

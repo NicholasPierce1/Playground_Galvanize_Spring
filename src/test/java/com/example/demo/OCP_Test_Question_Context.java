@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.*;
 
@@ -398,5 +399,42 @@ public class OCP_Test_Question_Context {
     public void testRandom1(){
         int[] ar = {1};
 
+    }
+
+    @Test
+    public void testRegex(){
+        Pattern regex = Pattern.compile("^[0-9]+[eE][+\\-][0-9]+$|^[0-9]+\\.[0-9]+$");
+        Matcher matcher = regex.matcher("01.01");
+        System.out.println("good 1: " + matcher.matches());
+
+        System.out.println("good 2: " + regex.matcher("01e-1").matches());
+
+        System.out.println("bad 1.1: " + regex.matcher("e-1").matches());
+        System.out.println("bas 1.2: " + regex.matcher("01e*1").matches());
+
+        System.out.println("bad 2.1: " + regex.matcher("12345").matches());
+        System.out.println("bad 2.2: " + regex.matcher("12345.").matches());
+        System.out.println("bad 2.3: " + regex.matcher(".12345").matches());
+
+        Pattern regexTwo = Pattern.compile("^[\\w-]+!(?:[a-z]|[1-9])");
+        System.out.println(regexTwo.matcher("abcd10A-!7").matches());
+
+        System.out.println("clau: " + Pattern.matches("^.*[^A-Za-z0-9\s,'\\(\\)].*$", "Strtgy in ('07h', '15L')"));
+        System.out.println("alphanumeric only: " + Pattern.matches("^.*[^A-Za-z0-9].*$", "abc129$"));
+        System.out.println("test: " + "$abc123../".replaceAll("[^a-zA-Z0-9]", ""));
+
+        // capturing and non-capturing
+
+        Pattern capture = Pattern.compile("(https?|ftp)://([^/\\r\\n]+)(/[^\\r\\n]*)?");
+        Matcher matcherOfCapture = capture.matcher("http://stackoverflow.com/questions");
+        System.out.println("capture matches: " + matcherOfCapture.matches());
+        for(int i = 0; i < matcherOfCapture.groupCount() + 1; i++)
+            System.out.printf("match (%d) %s\n",i,matcherOfCapture.group(i));
+
+        Pattern noncapture = Pattern.compile("(?:https?|ftp)://([^/\r\n]+)(/[^\r\n]*)?");
+        Matcher matcherOfNonCapture = noncapture.matcher("http://stackoverflow.com/stuff/questions?answer=123");
+        System.out.println("\ncapture matches: " + matcherOfNonCapture.matches());
+        for(int i = 0; i < matcherOfNonCapture.groupCount() + 1; i++)
+            System.out.printf("match with non capture (%d) %s\n",i,matcherOfNonCapture.group(i));
     }
 }

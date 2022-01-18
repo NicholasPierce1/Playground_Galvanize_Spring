@@ -19,7 +19,10 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.boot.CommandLineRunner;
+import javax.servlet.http.Cookie;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,20 +55,23 @@ public class DemoApplication {
 
 	public static void main(String[] args) {
 
+		/*
+		bean profiles must be set BEFORE the application context is created
+		 */
 		final ApplicationContext context = SpringApplication.run(DemoApplication.class, args);
-
 
 		final DemoApplication demoApplication = (DemoApplication)context.getBean("demoApplication");
 
 		final ApplicationContext applicationContext = (ApplicationContext)context.getBean("getXmlApplicationContext");
 
-		demoApplication.env.setActiveProfiles("dev");
+		//demoApplication.env.setActiveProfiles("dev"); // not working rn
 
 		List<String> list = new ArrayList<String>(java.util.Arrays.asList(context.getBeanDefinitionNames()));
 //		System.out.println(list.contains("MongoClient"));
 //		System.out.println(list.contains("mongoClient"));
 		System.out.println(list.contains("demoApplication"));
 		System.out.println("is profile bean found: " + list.contains("getDummyBeanClass"));
+		System.out.println("is dev dummy model bean found: " + list.contains("devProfile"));
 
 		// keep defaults (beans which belongs to all profiles, no profile tag, will always be there)
 		// set or add active profiles varying on if you're running dev, prod, or other

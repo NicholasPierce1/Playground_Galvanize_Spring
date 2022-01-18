@@ -10,12 +10,23 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.WebApplicationInitializer;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.swing.text.DateFormatter;
 import java.time.format.DateTimeFormatter;
 
 @Configuration
-public class ConfigurationFile {
+public class ConfigurationFile { //implements WebApplicationInitializer {
+
+//    @Override
+//    public void onStartup(ServletContext servletContext) throws ServletException {
+//        final String profile = "dev";
+//        System.out.println("bean profile being setup with " + profile);
+//        servletContext.setInitParameter(
+//                "spring.profiles.active", profile);
+//    }
 
     public @Bean ObjectMapper getObjectMapper(){
         return JsonMapper.builder()

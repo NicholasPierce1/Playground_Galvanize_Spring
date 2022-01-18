@@ -122,9 +122,11 @@ class DemoApplicationTests {
 		System.out.println(date);
 
 		final HashMap<String, Object> objectHashMap = new HashMap<>();
-		objectHashMap.put("test_1", "someValue");
+		//objectHashMap.put("test_1", "someValue");
+		objectHashMap.put("test_1", null);
 		objectHashMap.put("my_test_2", 3);
 		objectHashMap.put("test_3", null);
+		objectHashMap.put("test_4", new ArrayList<Integer>());
 		objectHashMap.put("test_date", String.valueOf(date));
 		objectHashMap.put("sub_class",
 				new HashMap<String, Object>(){{

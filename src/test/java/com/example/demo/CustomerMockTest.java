@@ -4,19 +4,22 @@ import com.example.demo.Repository.CustomerRepository;
 import com.example.demo.controllers.CustomerController;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,6 +47,21 @@ public class CustomerMockTest {
         assertNotNull(this.customerRepository);
         when(customerController.getAll()).thenReturn(null);
         assertNull(customerController.getAll());
+//        when(customerController.getAll()).then(new Answer<Void>() {
+//            @Override
+//            public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+//                return null;
+//            }
+//        });
+        List<Integer> mock = Mockito.mock(List.class);
+
+        Mockito.doAnswer(
+                (paramter) -> {
+                    System.out.println("param: " + paramter.getArgument(0));
+                    return null;
+                }
+        ).when(mock).add(5);
+        mock.add(5);
     }
 
 /*

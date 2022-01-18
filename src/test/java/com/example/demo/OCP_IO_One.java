@@ -16,10 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Properties;
+import java.util.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class OCP_IO_One {
@@ -111,12 +108,57 @@ public class OCP_IO_One {
             SerializeMe serializeMe = new OCP_IO_One.SerializeMe();
             serializeMe.setX(10);
             objectOutputStream.writeObject(serializeMe);
+            objectOutputStream.writeObject(new ArrayList<Integer>(Arrays.<Integer>asList(1,2)));
             objectOutputStream.flush();
+            // filter
+            // !* = reject all
+            // * = accept all
+            // no match = accept (see their excellent doc on create filter for more)
+//            ObjectInputFilter objectInputFilter = ObjectInputFilter.Config.createFilter(
+//                     "com.example.demo.OCP_IO_One.SerializeMe;"
+//                             + "!java.util.ArrayList"
+//                   // + "!*"
+//                    );
+//            objectInputStream.setObjectInputFilter(objectInputFilter);
+
+            ObjectInputFilter objectInputFilter = new ObjectInputFilter() {
+                @Override
+                public Status checkInput(FilterInfo filterInfo) {
+                    try {
+                        // can get stream bytes any time
+                        if(filterInfo.serialClass() != null)
+                            System.out.println("deserializing: " + filterInfo.serialClass().getName());
+                        else {
+                            System.out.println(
+                                    "\treferences: " + filterInfo.references() + // members
+                                            "\n\tdepth: " + filterInfo.depth() + // nested object (non-primitive)
+                                            "\n\tarray length: " + filterInfo.arrayLength()
+                            );
+                            return Status.ALLOWED;
+                        }
+                    }
+                    catch(Exception ex){
+                        System.out.println("inner oops: " + ex);
+                    }
+
+                    if(filterInfo.serialClass() == ArrayList.class)
+                        System.out.println("REJECTED: " + filterInfo.serialClass().getName());
+
+                    return filterInfo.serialClass() != ArrayList.class ? Status.ALLOWED : Status.REJECTED;
+                }
+            };
+
+            objectInputStream.setObjectInputFilter(objectInputFilter);
 
             System.out.println("reading");
             String object = (String)objectInputStream.readObject();
             Long object1 = (Long)objectInputStream.readObject();
             OCP_IO_One.SerializeMe object2 = (OCP_IO_One.SerializeMe)objectInputStream.readObject();
+
+            // test filter
+            Assertions.assertThrows(InvalidClassException.class, () -> objectInputStream.readObject());
+
+
             System.out.println("read is: " + object);
             System.out.println("read is: " + object1);
             System.out.println("read is: " + object2);
@@ -139,6 +181,8 @@ public class OCP_IO_One {
 
         // be public or have public getter and setter
         private int x;
+
+        public MySubClassInSerialization mySubClassInSerialization = new MySubClassInSerialization();
 
         public int getX(){return this.x;}
 
@@ -165,6 +209,8 @@ public class OCP_IO_One {
 
         public String name = "myName";
 
+        static {}
+
         {
             name = "myNameButInitialized";
         }
@@ -178,6 +224,14 @@ public class OCP_IO_One {
                 e.printStackTrace();
                 return "oops";
             }
+        }
+
+        public static class MySubClassInSerialization implements Serializable{
+            public String subObjectString = "subObjectStringValue";
+            public Double someDouble = 3.0;
+            public HashSet<Integer> set = new HashSet<>(){{
+                add(1);
+            }};
         }
 
     }
@@ -205,7 +259,6 @@ public class OCP_IO_One {
             System.out.println((char)inputStreamReader.read());
             inputStreamReader.reset();
             System.out.println((char)inputStreamReader.read());
-
         }
         catch(FileNotFoundException e){
             System.out.println(e.getMessage());

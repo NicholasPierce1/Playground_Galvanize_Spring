@@ -2,6 +2,7 @@ package com.example.demo.domain.JsonMapperTestPackage;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.sql.Date;
@@ -9,6 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @JsonIgnoreProperties(value = {"test_3"}, ignoreUnknown = true)
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class JsonMapperTest {
 
     @JsonProperty(value = "test_1")

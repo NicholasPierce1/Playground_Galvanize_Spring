@@ -17,13 +17,14 @@ import org.springframework.web.context.request.WebRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -34,9 +35,13 @@ public class HelloController {
     private static Logger logger = LoggerFactory.getLogger(HelloController.class);
 
     @GetMapping("/")
-    public String helloWorld() {
+    public String helloWorld(HttpSession httpSession) {
 
-        logger.info("hello world from logger!");
+        //Date date = Date.from(Instant.from(LocalDate.now())).
+
+        logger.info("hello world from {} logger!", "my");
+
+        System.out.println(httpSession);
 
         return "Hello from Spring!";
     }

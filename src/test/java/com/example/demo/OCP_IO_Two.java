@@ -2,6 +2,7 @@ package com.example.demo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.istack.NotNull;
+import joptsimple.util.RegexMatcher;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -22,11 +23,12 @@ import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.UserPrincipal;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.Period;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.UnaryOperator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -42,6 +44,8 @@ public class OCP_IO_Two {
     final Path pathOne = Paths.get("C://Test/Files/NIO/fileOne.txt");
 
     final Path pathTwo = Paths.get("C://Test/Files/NIO/fileTwo.txt");
+
+    final Path pathThree = Paths.get(pathOne.getParent().toFile().getPath() + "/fileThree.txt");
 
     final Path pathDirectory = Paths.get(pathOne.getParent().toFile().getPath(), "\\SubFolder/");
 
@@ -615,8 +619,10 @@ public class OCP_IO_Two {
         // suffix (file type)
         // file (directory location)
         try {
+            // will perceive prefix as a path to a file with directories and use just the file name.
+            // if the file name is just a traversal character then it uses it but not canonically to where any paths are changed
             final File createdTempFile =
-                    File.createTempFile(tempFile.getName().replaceFirst("\\.d.{0,}",""), ".txt");//, tempFile.getParentFile());
+                    File.createTempFile("../../../" + tempFile.getName().replaceFirst("\\..{0,}","") + "/../", ".txt");//, tempFile.getParentFile());
 
             System.out.println(createdTempFile.getPath());
 
@@ -646,7 +652,7 @@ public class OCP_IO_Two {
 
             System.out.println(zipPath.getFileName().toString());
             System.out.println(zipPath.getName(zipPath.getNameCount() - 1));
-            ZipEntry zipEntry = new ZipEntry(zipPath.getFileName().toString());
+            ZipEntry zipEntry = new ZipEntry("zipFile.txt");
 
             // zip file
             zipOutputStream.putNextEntry(zipEntry);
@@ -657,11 +663,17 @@ public class OCP_IO_Two {
 
             // zip folder
 
+            // adding empty zip folder to zip file
+            System.out.println("parent directory to add: " + pathZipFolder.getParent().getFileName().toString());
+            zipOutputStream.putNextEntry(new ZipEntry(pathZipFolder.getParent().getFileName().toString() +"/"));
+            final String subfolderInZip = pathZipFolder.getParent().getFileName().toString() + "/";
+            zipOutputStream.closeEntry();
+
             Files.list(pathZipFolder)
                     .forEach(
                             (filePath) -> {
                                 try(InputStream subFileInputStream = Files.newInputStream(filePath, StandardOpenOption.READ)) {
-                                    ZipEntry subZipEntry = new ZipEntry(filePath.toString());
+                                   ZipEntry subZipEntry = new ZipEntry(subfolderInZip + filePath.getFileName().toString());
 
                                     zipOutputStream.putNextEntry(subZipEntry);
 
@@ -697,29 +709,106 @@ public class OCP_IO_Two {
     private void readZipFile(@NotNull final Path zipPath) throws IOException{
 
         try(final FileInputStream fileInputStream = new FileInputStream(zipPath.toFile());
-            final ZipInputStream zipInputStream = new ZipInputStream(fileInputStream)){
+            final ZipInputStream zipInputStream = new ZipInputStream(fileInputStream);
+            final FileOutputStream fileOutputStream = new FileOutputStream(pathThree.toFile()) ){
 
             ZipEntry zipEntry;
-
+            List<ZipEntry> zipEntries = new ArrayList<>();
             read: while((zipEntry = zipInputStream.getNextEntry()) != null) {
                 System.out.println("name: " + zipEntry.getName());
                 System.out.println("Is a directory? " + zipEntry.isDirectory());
+                // System.out.println(Paths.get(zipEntry.getName()));
 
-                if(zipEntry.isDirectory())
+                if(zipEntry.isDirectory()) {
+                    Assertions.assertEquals(0, zipInputStream.readAllBytes().length);
                     continue read;
-
+                }
+                zipEntries.add(zipEntry);
                 System.out.println(zipEntry.getSize());
                 System.out.println(zipEntry.getCompressedSize());
-                byte[] data = zipInputStream.readAllBytes();
+//                byte[] data = zipInputStream.readAllBytes();
+                byte[] data = new byte[5];
+                int read = -1;
+
                 System.out.print("message: ");
-                for(final byte character: data)
-                    System.out.print((char)character);
+                while( (read =zipInputStream.read(data)) != -1) {
+
+                    // note: not ideal way to read bytes -- here for demonstration
+                    if(read == data.length)
+                        for (final byte character : data)
+                            System.out.print((char) character);
+                    else
+                        for (int i = 0; i < read; i++)
+                            System.out.print((char) data[i] +
+                                    ( (i + 1) == read ?
+                                    "\tlast slice size: " + read :
+                                    "" )
+                            );
+
+                    if(zipEntry.getName().equals("zipFile.txt")) {
+                        this.writeZipFile(fileOutputStream, data, read);
+                    }
+                }
+
                 System.out.println();
+
+                // optional: closes current entry for reading of next entry
+                zipEntry.setLastAccessTime(FileTime.from(Instant.now()));
+                zipInputStream.closeEntry();
             }
+
+            for(final ZipEntry zipEntry1 : zipEntries)
+                System.out.println(
+                        zipEntry1.getName() + " : " +
+                                zipEntry1.getSize() + " : " +
+                                LocalDateTime.ofInstant(
+                                        zipEntry1.getLastAccessTime().toInstant(), ZoneId.systemDefault()
+                                )
+                );
+
+            this.readFile(pathThree.toFile());
 
         }
 
     }
+
+    private void writeZipFile(final FileOutputStream fileOutputStream, final byte[] data, final int toRead) throws IOException{
+
+        fileOutputStream.write(data,0,toRead);
+
+    }
+
+    private void readFile(final File toRead) throws IOException{
+        try(final InputStream inputStream = new FileInputStream(toRead)){
+            System.out.println("reading file: ");
+            for(final byte readByte : inputStream.readAllBytes())
+                System.out.print((char) readByte);
+        }
+        System.out.println();
+    }
+
+    @Test
+    public void readFile() throws IOException{
+
+        if(terminate)
+            return;
+
+        System.out.println("reading file: ");
+        try(FileInputStream fileInputStream = new FileInputStream(pathTwo.toFile())){
+            final byte[] data = new byte[3];
+            int read;
+
+            while((read = fileInputStream.read(data)) != -1) {
+                System.out.print("characters: ");
+                for (final byte character : data)
+                    System.out.print((char) character);
+                System.out.println("\nlast char: "+ (char)data[read-1]); // 5 chars read --> 4 is the last index w/ no offset
+            }
+        }
+
+        System.out.println(String.format("%s (%s) %d", "I have this much money: ", String.valueOf(100.5), 10));
+    }
+
 
     enum Blah{a,b}
 
@@ -743,6 +832,9 @@ public class OCP_IO_Two {
         System.out.println(Arrays.toString(new ArrayList<String>() {{
             add("1");
         }}.toArray(new String[0])));
+
+        double testThis = 3e-1;
+        System.out.println(testThis);
 
         //System.out.println(pathOne.getFileName());
     }
