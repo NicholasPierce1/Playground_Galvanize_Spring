@@ -11,7 +11,7 @@ public final class Tree<T extends Comparable<T>> {
 
     private Tree(){}
     
-    private final class Node<V extends Comparable<V>>{
+    public static final class Node<V>{
         
         private Node<V> leftNode = null;
         
@@ -36,19 +36,19 @@ public final class Tree<T extends Comparable<T>> {
             
         }
 
-         Node<V> getLeftNode() {
+         public Node<V> getLeftNode() {
             return leftNode;
         }
 
-         Node<V> getRightNode() {
+         public Node<V> getRightNode() {
             return rightNode;
         }
 
-         V getValue() {
+         public V getValue() {
             return value;
         }
 
-        Node<V> getParentNode() {
+        public Node<V> getParentNode() {
             return parentNode;
         }
 
@@ -77,10 +77,10 @@ public final class Tree<T extends Comparable<T>> {
             else if(object == this)
                 return true;
             
-            else if(!(object instanceof Tree<?>.Node<?>))
+            else if(!(object instanceof Node<?>))
                 return false;
             
-            Tree<?>.Node<?> node = (Tree<?>.Node<?>)object;
+            Node<?> node = (Node<?>)object;
             
             return node.getValue().equals(this.getValue());
         }
@@ -141,14 +141,14 @@ public final class Tree<T extends Comparable<T>> {
 
             Arrays.stream(treeInput).skip(1).forEach(
                     (T nodeValue) -> {
-                        System.out.println(this.addChild(tree, tree.getRoot(), nodeValue));
+                        System.out.println(this.addChild(tree.getRoot(), nodeValue));
                     }
             );
 
             return null;
          }
          
-         private Tree<T>.Node<T> addChild(@NotNull final Tree<T> tree, @NotNull final Tree<T>.Node<T> currentNode, @NotNull final T value) throws MalformedTreeInputException{
+         private Node<T> addChild(@NotNull final Node<T> currentNode, @NotNull final T value) throws MalformedTreeInputException{
 
              // determined L || R
              // if not null, recurse
@@ -167,10 +167,10 @@ public final class Tree<T extends Comparable<T>> {
                  
                  // traverse if not null
                  if(currentNode.getRightNode() != null)
-                     return addChild(tree, currentNode.getRightNode(), value);
+                     return addChild(currentNode.getRightNode(), value);
                  
                  // doesn't exist yet: set
-                 currentNode.setRightNode(tree.new Node<T>(value, currentNode));
+                 currentNode.setRightNode(new Node<T>(value, currentNode));
                  return currentNode.getRightNode();
              }
              
@@ -180,10 +180,10 @@ public final class Tree<T extends Comparable<T>> {
 
                  // traverse if not null
                  if(currentNode.getLeftNode() != null)
-                     return addChild(tree, currentNode.getLeftNode(), value);
+                     return addChild(currentNode.getLeftNode(), value);
 
                  // doesn't exist yet: set
-                 currentNode.setLeftNode(tree.new Node<T>(value, currentNode));
+                 currentNode.setLeftNode(new Node<T>(value, currentNode));
                  return currentNode.getLeftNode();
                  
              }
@@ -191,8 +191,8 @@ public final class Tree<T extends Comparable<T>> {
              
          }
          
-         private Tree<T>.Node<T> setRoot(@NotNull final Tree<T> tree, @NotNull final T value){
-             tree.setRoot(tree.new Node<T>(value, null));
+         private Node<T> setRoot(@NotNull final Tree<T> tree, @NotNull final T value){
+             tree.setRoot(new Node<T>(value, null));
 
              System.out.println(tree.getRoot());
 
