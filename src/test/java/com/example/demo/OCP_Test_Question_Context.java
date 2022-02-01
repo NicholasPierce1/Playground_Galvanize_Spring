@@ -329,6 +329,28 @@ public class OCP_Test_Question_Context {
 
         System.out.println(instance == instance.blah());
 
+        System.out.println(
+                Arrays.deepHashCode(new Object[]{1,2,new int[]{2,3}}) + " " +
+                        Arrays.deepHashCode(new Object[]{1,2,new int[]{2,3}})
+                );
+
+        System.out.println(Arrays.hashCode(new int[]{1,2}) + " " + Arrays.hashCode(new int[]{1,2}));
+        System.out.println(Arrays.deepHashCode(new Integer[]{1,2}) + " " + Arrays.deepHashCode(new Integer[]{1,2}));
+    }
+
+    @Test
+    public void reflectionTest(){
+
+        ArrayList<Integer> list = new ArrayList<>();
+
+        Class<ArrayList<Integer>> type = (Class<ArrayList<Integer>>) list.getClass();
+
+        System.out.println("get name: " + type.getName());
+        System.out.println("get canonical name: " + type.getCanonicalName());
+
+        // System.out.println("is an list: " + (type.getName() instanceof ArrayList));
+
+        System.out.println(String.format("double: %.1f", 5.6));
     }
 
     public class SomeClass{
@@ -398,6 +420,8 @@ public class OCP_Test_Question_Context {
     @Test
     public void testRandom1(){
         int[] ar = {1};
+
+        System.out.println("compare: " + ((Integer)1).compareTo(0));
 
     }
 
