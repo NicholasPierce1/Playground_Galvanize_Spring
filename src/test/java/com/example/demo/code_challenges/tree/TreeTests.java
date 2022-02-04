@@ -274,6 +274,43 @@ public class TreeTests {
         final List<Triplet<Tree<Integer>, Integer, List<Set<Integer>>>> testData =
                 this.getBurningTreeTestData();
 
+        testData.stream().forEach(
+                (triplet) -> {
+
+                    System.out.println("\nnew tree");
+
+                    // acquire actual (expected inside triplet-tuple)
+                    final List<? extends Set<Integer>> actual =
+                            this.<Integer>burnTree(
+                                    triplet.getValue0(),
+                                    triplet.getValue1()
+                            );
+
+                    // iterate through each level, print it out, and assert equality
+                    Assertions.assertEquals(triplet.getValue2().size(), actual.size());
+
+                    for(int i = 0; i < actual.size(); i++){
+
+                        final Set<Integer> expectedBurntNodes = triplet.getValue2().get(i);
+
+                        final Set<Integer> actualBurntNodes = actual.get(i);
+
+                        Assertions.assertEquals(expectedBurntNodes.size(), actualBurntNodes.size());
+
+                        System.out.printf(
+                                "Burnt nodes for level (%d): expected(%s)  --- actual(%s)\n",
+                                i + 1,
+                                expectedBurntNodes.toString(),
+                                actualBurntNodes.toString()
+                        );
+
+                        Assertions.assertEquals(expectedBurntNodes, actualBurntNodes);
+
+                    }
+
+                }
+        );
+
     }
 
     @SuppressWarnings("unchecked")
@@ -365,7 +402,7 @@ public class TreeTests {
                             System.out.println("\ncreating tree: ");
                             final Tree.TreeBuilder<Integer> treeBuilder = new Tree.TreeBuilder<Integer>();
                             treeBuilder.setTreeInput(data);
-                            return new Pair<Tree<Integer>, Integer>(treeBuilder.construct(), data[data.length -1]);
+                            return new Pair<Tree<Integer>, Integer>(treeBuilder.construct(), data[data.length - 1]);
                         }
                 );
 
@@ -439,6 +476,67 @@ public class TreeTests {
         testData.stream().forEach((data) -> System.out.println(data.getValue2()));
 
         return testData;
+    }
+
+    private <T extends Comparable<T>> List<? extends Set<T>> burnTree(
+            @NotNull final Tree<T> tree, @NotNull final T startingNodeValue){
+
+        // acquire starting node
+        final Tree.Node<T> startingNode = tree.getNode(startingNodeValue, tree.getRoot());
+
+        final List<HashSet<T>> burntNodes = new ArrayList<HashSet<T>>();
+
+        final Set<T> allBurntNodes = new HashSet<T>();
+
+        // burn starting node
+        burntNodes.add(new HashSet<T>(){{add(startingNode.getValue());}});
+        allBurntNodes.add(startingNode.getValue());
+
+        // enumerates elements to burn on next pass
+        List<Tree.Node<T>> nodesToBurnNext = new ArrayList<Tree.Node<T>>();
+        nodesToBurnNext.add(startingNode);
+
+
+        while(!nodesToBurnNext.isEmpty()){
+
+            List<Tree.Node<T>> nodesToVisit = new ArrayList<Tree.Node<T>>(nodesToBurnNext);
+            nodesToBurnNext.clear();
+
+            // acquires all non-null, contiguous nodes
+            for(final Tree.Node<T> node : nodesToVisit){
+
+                final List<Tree.Node<T>> contiguousNodes = Arrays.asList(
+                        node.getParentNode(),
+                        node.getLeftNode(),
+                        node.getRightNode()
+                );
+
+                for(final Tree.Node<T> nextNode : contiguousNodes){
+
+                    // not null and haven't seen it yet
+                    if(nextNode != null && !allBurntNodes.contains(nextNode.getValue())){
+
+                        // add to iterable and aggregate result
+                        nodesToBurnNext.add(nextNode);
+                        allBurntNodes.add(nextNode.getValue());
+
+                    }
+
+                }
+
+            }
+
+            // add nodes to burn next into return list -> convert into a set of node values
+            if(!nodesToBurnNext.isEmpty())
+                burntNodes.add(
+                        nodesToBurnNext.stream()
+                                .map(Tree.Node<T>::getValue)
+                                .collect(Collectors.toCollection(HashSet<T>::new))
+                );
+
+        }
+
+        return burntNodes;
     }
 
 }
