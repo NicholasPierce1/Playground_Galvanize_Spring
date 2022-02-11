@@ -13,13 +13,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/* TODO:
-        1) refactor 'createTreesTest' to access equality via tree's equal implementation
-        1.1.1) use clone method and test for equality of values (memory addresses are different + nodes' too)
-        1.1) use reflections to auto create each respective tree
-        1.2) use clone method from each incremental tree to add new nodes
-        2) implement burn tree
- */
 public class TreeTests {
 
     private final Integer[][] valid_trees = new Integer[][]{
@@ -313,6 +306,86 @@ public class TreeTests {
 
     }
 
+    @Test
+    public void maxWidthTreeTest(){
+
+        // copy for that test data may change in the future
+        // creation of expected results can not be automated
+        // hardcoded trees required
+        final Integer[][] valid_trees = new Integer[][]{
+                // tree one
+                new Integer[]{5, 10},
+                // tree two
+                new Integer[]{5, 10, 0},
+                // tree three
+                new Integer[]{5, 10, 0, 7, 12},
+                // tree four
+                new Integer[]{5, 10, 3, 7, 12, 1, 4},
+                // tree five
+                new Integer[]{5},
+                // tree six
+                new Integer[]{5, 10, 0, 4, 6}
+        };
+
+        final List<Pair<Integer,Integer>> expectedResults =
+                Arrays.asList(
+                        new Pair<Integer, Integer>(1,10),
+                        new Pair<Integer, Integer>(1,10),
+                        new Pair<Integer, Integer>(2,19),
+                        new Pair<Integer, Integer>(2,24),
+                        new Pair<Integer, Integer>(0,5),
+                        new Pair<Integer, Integer>(1,10)
+                );
+
+        if(expectedResults.size() != valid_trees.length)
+            Assertions.fail("input data segments must be equal length");
+
+        final List<Triplet<Tree<Integer>,Integer,Integer>> inputData = new ArrayList<Triplet<Tree<Integer>,Integer,Integer>>();
+
+        for(int i = 0; i < valid_trees.length; i++) {
+
+            System.out.printf(
+                    "%s" + "creating tree: %d\n",
+                    i == 0 ? "" : "\n",
+                    i + 1
+            );
+
+            final Tree.TreeBuilder<Integer> treeBuilder = new Tree.TreeBuilder<Integer>();
+            treeBuilder.setTreeInput(valid_trees[i]);
+
+            inputData.add(
+                    new Triplet<Tree<Integer>,Integer,Integer>(
+                            treeBuilder.construct(),
+                            expectedResults.get(i).getValue0(),
+                            expectedResults.get(i).getValue1()
+                    )
+            );
+
+        }
+
+        inputData.forEach(
+                (input) -> {
+
+                    final Pair<Integer, Integer> actual =
+                            this.maxWidthTree(input.getValue0());
+
+                    // level
+                    Assertions.assertEquals(
+                            input.getValue1(),
+                            actual.getValue0()
+                    );
+
+                    // value
+                    Assertions.assertEquals(
+                            input.getValue2(),
+                            actual.getValue1()
+                    );
+
+                }
+        );
+
+    }
+
     @SuppressWarnings("unchecked")
     private <T extends Comparable<T>> Tree<T> createTreeIncrementWithReflection(
             @NotNull final Pair<Tree<T>, T[]> pair) {
@@ -537,6 +610,86 @@ public class TreeTests {
         }
 
         return burntNodes;
+    }
+
+    private Pair<Integer, Integer> maxWidthTree(@NotNull final Tree<Integer> tree){
+
+        final MaxWidthTreeHelperClass maxWidthTreeHelperClass = new MaxWidthTreeHelperClass();
+
+        this.findMaxWidthTreeHelper(
+                tree.getRoot(),
+                maxWidthTreeHelperClass,
+                0
+        );
+
+        return new Pair<Integer, Integer>(
+                maxWidthTreeHelperClass.getMaxWidthTreeLevel(),
+                maxWidthTreeHelperClass.getMaxWidthTreeValue()
+        );
+
+    }
+
+    private void findMaxWidthTreeHelper(
+            @NotNull final Tree.Node<Integer> currentNode,
+            @NotNull final MaxWidthTreeHelperClass maxWidthTreeHelperClass,
+            final int level){
+
+        // guard clause
+        if(currentNode == null)
+            return;
+
+        // add current value at tree level
+        maxWidthTreeHelperClass.addValueAtLevel(level, currentNode.getValue());
+
+        // left
+        this.findMaxWidthTreeHelper(
+                currentNode.getLeftNode(),
+                maxWidthTreeHelperClass,
+                level + 1
+        );
+
+        // right
+        this.findMaxWidthTreeHelper(
+                currentNode.getRightNode(),
+                maxWidthTreeHelperClass,
+                level + 1
+        );
+
+    }
+
+    private static class MaxWidthTreeHelperClass{
+
+        private final TreeMap<Integer, Integer> treeMap = new TreeMap<Integer, Integer>();
+
+        private Integer maxWidthTreeLevel = null, maxWidthTreeValue = null;
+
+        MaxWidthTreeHelperClass(){}
+
+        void addValueAtLevel(@NotNull final Integer level, @NotNull final Integer value){
+
+            final int accumulativeValue =
+                    this.treeMap.containsKey(level) ?
+                            this.treeMap.get(level) + value : value;
+
+            this.treeMap.put(level, accumulativeValue);
+
+            if(maxWidthTreeLevel == null || maxWidthTreeValue < accumulativeValue) // init or new max
+                this.setMaxLevelAndValue(level, accumulativeValue);
+
+        }
+
+        private void setMaxLevelAndValue(@NotNull final Integer level, @NotNull final Integer value){
+            this.maxWidthTreeValue = value;
+            this.maxWidthTreeLevel = level;
+        }
+
+        public Integer getMaxWidthTreeLevel() {
+            return maxWidthTreeLevel;
+        }
+
+        public Integer getMaxWidthTreeValue() {
+            return maxWidthTreeValue;
+        }
     }
 
 }
