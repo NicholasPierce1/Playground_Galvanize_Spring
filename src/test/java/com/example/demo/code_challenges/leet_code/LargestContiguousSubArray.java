@@ -32,6 +32,10 @@ public class LargestContiguousSubArray {
                 new Pair<int[], Integer>(
                         new int[]{10,-5,10},
                         15
+                ),
+                new Pair<int[], Integer>(
+                        new int[]{10,-5,10, 7, -10, 0, -5, 2, 1, 6, -2, 2, 9, -1, -1, -1, 3, 0},
+                        25
                 )
         ).forEach(
                 (testData) -> {
@@ -59,33 +63,21 @@ public class LargestContiguousSubArray {
 
         int currentMax = data[0];
 
-        List<Integer> currentValues = new ArrayList<Integer>();
+        int currentValue = currentMax;
 
-        for(final int currentNum : data) {
+        for(int i = 1; i < data.length; i++) {
 
-            if (currentValues.size() == 0)
-                // first value
-                currentValues.add(currentNum);
-            else {
+                final int currentNum = data[i];
 
-                final List<Integer> newValues = new ArrayList<Integer>();
+                final int localMax = Math.max(currentValue + currentNum, currentNum);
 
-                for(final Integer number: currentValues) {
+                if (localMax > currentMax)
+                    currentMax = localMax;
 
-                    final int localMax = Math.max(number + currentNum, currentNum);
-
-                    newValues.add(localMax);
-
-                    if (localMax > currentMax)
-                        currentMax = localMax;
-
-                }
-
-                // reassign list reference to hold new prospective values/ sub-arrays
-                currentValues = newValues;
+                // reassign int value to hold new prospective sub-array sum
+                currentValue = localMax;
 
             }
-        }
 
         return currentMax;
 
