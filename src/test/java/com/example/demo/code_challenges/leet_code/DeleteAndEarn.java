@@ -151,6 +151,16 @@ public class DeleteAndEarn {
                         Arrays.asList(16,11,7,5,2,1,3,15,12,9,14),
                         67,
                         new HashSet<Integer>(Arrays.asList(1,3,5,7,9,12,14,16))
+                ),
+                new Triplet<List<Integer>,Integer,Set<Integer>>(
+                        Arrays.asList(1,2,2,3),
+                        4,
+                        new HashSet<Integer>(Arrays.asList(1,3))
+                ),
+                new Triplet<List<Integer>,Integer,Set<Integer>>(
+                        Arrays.asList(1,2,2,2,3),
+                        6,
+                        new HashSet<Integer>(Arrays.asList(2))
                 )
         ).forEach(
                 (testData) -> {
@@ -199,6 +209,9 @@ public class DeleteAndEarn {
 
         for(final Integer key : data.keySet()){
 
+            if(!data.containsKey(key))
+                continue;
+
             // evaluate case 3
             if(!data.containsKey(key - 1) && !data.containsKey(key + 1)) // no neighbors add to removal
                 toRemove.getValue0().add(key);
@@ -234,12 +247,15 @@ public class DeleteAndEarn {
                 /*
                 [1,2]
                 [1,2,3]
+                [1,2,2,2,3]
                 [1,2,3,3,3,4]
                  */
                 else{
 
-                    if(negatives.size() == 1)
+                    if(negatives.size() == 1) {
                         data.remove(key - 1);
+                        data.remove(key + 1);
+                    }
                     else if(negatives.size() == 0)
                         throw new IllegalArgumentException("negative size is 0 on a disjoint");
                     else{
@@ -281,6 +297,9 @@ public class DeleteAndEarn {
                 negatives.add(key);
 
         }
+
+        if(!negatives.isEmpty())
+            toRemove.getValue1().add(negatives);
 
         // iterate through all individual values, add to sum and result set
         for(final Integer valueRemoved : toRemove.getValue0()){
